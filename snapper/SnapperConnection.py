@@ -50,9 +50,9 @@ class SnapperConnection:
                                                        BaseHandler[Callable[[SnapperConnection.ConfigName], None]]())
 
         self.snapshot_created = self.__register_handler("SnapshotCreated", BaseHandler[
-            Callable[[SnapperConnection.ConfigName, List[SnapperConnection.SnapshotNumber]], None]]())
+            Callable[[SnapperConnection.ConfigName, SnapperConnection.SnapshotNumber], None]]())
         self.snapshot_deleted = self.__register_handler("SnapshotModified", BaseHandler[
-            Callable[[SnapperConnection.ConfigName, List[SnapperConnection.SnapshotNumber]], None]]())
+            Callable[[SnapperConnection.ConfigName, SnapperConnection.SnapshotNumber], None]]())
         self.snapshot_modified = self.__register_handler("SnapshotsDeleted", BaseHandler[
             Callable[[SnapperConnection.ConfigName, List[SnapperConnection.SnapshotNumber]], None]]())
 

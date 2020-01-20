@@ -4,9 +4,10 @@ from os import getuid, system
 from os.path import abspath
 from sys import argv
 
-from PyQt5.QtWidgets import QApplication, QWidget
+from PyQt5.QtWidgets import QApplication
 
 from snapper.SnapperConnection import SnapperConnection
+from widgets.windows.MainWindow.MainWindow import MainWindow
 
 if __name__ == '__main__':
     if getuid() != 0:
@@ -18,7 +19,7 @@ if __name__ == '__main__':
 
     app = QApplication(argv)
 
-    widget = QWidget()
-    widget.show()
+    window = MainWindow()
+    window.show()
 
-    exit(app.exec())
+    exit(QApplication.exec())
