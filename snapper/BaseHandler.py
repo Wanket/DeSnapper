@@ -15,4 +15,4 @@ class BaseHandler(Generic[FunctionType]):
 
     def emit(self, *args, **kwargs):
         for callback in self.__callbacks:
-            callback(args, kwargs)
+            callback(*args, **kwargs)

@@ -1,10 +1,11 @@
-from typing import Dict
+from typing import Dict, List, Optional
 
 from PyQt5.QtCore import QPoint
 from PyQt5.QtGui import QCursor
-from PyQt5.QtWidgets import QMainWindow, QTreeWidgetItem, QListWidgetItem, QAbstractItemView, QMenu
+from PyQt5.QtWidgets import QMainWindow, QTreeWidgetItem, QListWidgetItem, QAbstractItemView, QMenu, QMessageBox
 
 from snapper.SnapperConnection import SnapperConnection
+from snapper.types import Snapshot
 from snapper.types.Config import Config
 from snapper.types.Snapshot import Snapshot
 from widgets.menus.ConfigMenu import ConfigMenu
@@ -24,6 +25,8 @@ class MainWindow(QMainWindow):
         self.__configs: Dict[SnapperConnection.ConfigName, Config]
         self.__current_config_snapshots: Dict[SnapperConnection.SnapshotNumber, Snapshot]
 
+        self.__current_config: Optional[Config] = None
+
         self.__configs = self.__get_configs()
 
         self.__setup_ui()
@@ -38,17 +41,24 @@ class MainWindow(QMainWindow):
             self.__ui.configsListWidget.addItem(QListWidgetItem(config_name))
 
     def __setup_listeners(self) -> None:
-        self.__ui.configsListWidget.itemSelectionChanged.connect(self.__on_configs_list_changed)
+        self.__ui.configsListWidget.itemSelectionChanged.connect(self.__on_configs_list_selected_item_changed)
         self.__ui.snapshotsTreeWidget.customContextMenuRequested.connect(
             self.__on_snapshots_tree_widget_context_menu_requested)
         self.__ui.configsListWidget.customContextMenuRequested.connect(
             self.__on_configs_list_widget_context_menu_requested)
 
-    def __on_configs_list_changed(self):
+        self.__snapper_connection.snapshots_deleted += self.__on_snapshots_deleted
+
+    def __on_configs_list_selected_item_changed(self):
         config_name = self.__ui.configsListWidget.currentItem().text()
+
+        if self.__current_config is not None and config_name == self.__current_config.name:
+            return
 
         self.__current_config_snapshots = self.__get_snapshots(config_name)
         self.__setup_snapshots_view(config_name)
+
+        self.__current_config = self.__configs[config_name]
 
     def __get_snapshots(self, config_name: str) -> Dict[int, Snapshot]:
         return {snapshot.number: snapshot for snapshot in self.__snapper_connection.list_snapshots(config_name)}
@@ -75,6 +85,9 @@ class MainWindow(QMainWindow):
                 snapshots.append(self.__current_config_snapshots[int(item.text(0))])
 
         menu = SnapshotMenu(self, snapshots)
+
+        menu.action_delete_snapshot.connect(lambda:self.__on_delete_snapshots(snapshots))
+
         menu.exec(QCursor.pos())
 
     def __on_configs_list_widget_context_menu_requested(self, pos: QPoint):
@@ -93,4 +106,28 @@ class MainWindow(QMainWindow):
             items = list()
         return items
 
-    # def __on_create_config(self):
+    def __on_delete_snapshots(self, snapshots: List[Snapshot]):
+        message_box = QMessageBox(self,
+                                  text=f"Are you sure you want to delete {len(snapshots)} "
+                                       f"{'snapshot' if len(snapshots) == 1 else 'snapshots'}",)
+        message_box.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+
+        if message_box.exec() == QMessageBox.Ok:
+            self.__snapper_connection.delete_snapshots(self.__current_config.name,
+                                                       [snapshot.number for snapshot in snapshots])
+
+    def __on_snapshots_deleted(self, config_name: str, snapshot_numbers: List[int]):
+        if self.__current_config is not None and self.__current_config.name == config_name:
+            top_level_item = self.__ui.snapshotsTreeWidget.topLevelItem(0)
+
+            i = 0
+            while i < top_level_item.childCount():
+                item = top_level_item.child(i)
+
+                if int(item.text(0)) in snapshot_numbers:
+                    top_level_item.removeChild(item)
+                else:
+                    i += 1
+
+            for snapshot_number in snapshot_numbers:
+                self.__current_config_snapshots.pop(snapshot_number)

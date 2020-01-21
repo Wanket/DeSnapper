@@ -44,17 +44,17 @@ class SnapperConnection:
 
         self.config_created = self.__register_handler("ConfigCreated",
                                                       BaseHandler[Callable[[SnapperConnection.ConfigName], None]]())
-        self.config_deleted = self.__register_handler("ConfigModified",
+        self.config_deleted = self.__register_handler("ConfigDeleted",
                                                       BaseHandler[Callable[[SnapperConnection.ConfigName], None]]())
-        self.config_modified = self.__register_handler("ConfigDeleted",
+        self.config_modified = self.__register_handler("ConfigModified",
                                                        BaseHandler[Callable[[SnapperConnection.ConfigName], None]]())
 
         self.snapshot_created = self.__register_handler("SnapshotCreated", BaseHandler[
             Callable[[SnapperConnection.ConfigName, SnapperConnection.SnapshotNumber], None]]())
-        self.snapshot_deleted = self.__register_handler("SnapshotModified", BaseHandler[
-            Callable[[SnapperConnection.ConfigName, SnapperConnection.SnapshotNumber], None]]())
-        self.snapshot_modified = self.__register_handler("SnapshotsDeleted", BaseHandler[
+        self.snapshots_deleted = self.__register_handler("SnapshotsDeleted", BaseHandler[
             Callable[[SnapperConnection.ConfigName, List[SnapperConnection.SnapshotNumber]], None]]())
+        self.snapshot_modified = self.__register_handler("SnapshotModified", BaseHandler[
+            Callable[[SnapperConnection.ConfigName, SnapperConnection.SnapshotNumber], None]]())
 
     # region ConfigData
     def list_configs(self) -> List[Config]:
@@ -168,7 +168,7 @@ class SnapperConnection:
 
     # region Signals
     def __register_handler(self, signal_mame, handler: BaseHandler[FunctionType]) -> BaseHandler[FunctionType]:
-        self.__interface.connect_to_signal(signal_mame, lambda *args, **kwargs: handler.emit(args, kwargs))
+        self.__interface.connect_to_signal(signal_mame, lambda *args, **kwargs: handler.emit(*args, **kwargs))
 
         return handler
     # endregion
