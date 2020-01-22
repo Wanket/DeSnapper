@@ -105,25 +105,27 @@ class SnapperConnection:
     # region Create/Delete snapshot
 
     def create_single_snapshot(self, config_name: str, description: str, cleanup: str,
-                               user_data: str) -> SnapshotNumber:
+                               user_data: Dict[str, str]) -> SnapshotNumber:
         return self.__interface.CreateSingleSnapshot(config_name, description, cleanup, user_data)
 
     def create_single_snapshot_v2(self, config_name: str, parent_number: int, read_only: bool, description: str,
-                                  cleanup: str, user_data: str) -> SnapshotNumber:
-        return self.__interface.CreateSingleSnapshot(config_name, parent_number, read_only, description, cleanup,
-                                                     user_data)
+                                  cleanup: str, user_data: Dict[str, str]) -> SnapshotNumber:
+        return self.__interface.CreateSingleSnapshotV2(config_name, parent_number, read_only, description, cleanup,
+                                                       user_data)
 
     def create_single_snapshot_of_default(self, config_name: str, read_only: bool, description: str, cleanup: str,
-                                          user_data: str) -> SnapshotNumber:
-        return self.__interface.CreateSingleSnapshot(config_name, read_only, description, cleanup, user_data)
+                                          user_data: Dict[str, str]) -> SnapshotNumber:
+        return self.__interface.CreateSingleSnapshotOfDefault(config_name, read_only, description, cleanup, user_data)
 
-    def create_pre_snapshot(self, config_name, description, cleanup, user_data) -> SnapshotNumber:
+    def create_pre_snapshot(self, config_name: str, description: str, cleanup: str,
+                            user_data: Dict[str, str]) -> SnapshotNumber:
         return self.__interface.CreatePreSnapshot(config_name, description, cleanup, user_data)
 
-    def create_post_snapshot(self, config_name, pre_number, description, cleanup, user_data) -> SnapshotNumber:
+    def create_post_snapshot(self, config_name: str, pre_number: int, description: str, cleanup: str,
+                             user_data: Dict[str, str]) -> SnapshotNumber:
         return self.__interface.CreatePreSnapshot(config_name, pre_number, description, cleanup, user_data)
 
-    def delete_snapshots(self, config_name, numbers: List[int]) -> None:
+    def delete_snapshots(self, config_name: str, numbers: List[int]) -> None:
         return self.__interface.DeleteSnapshots(config_name, numbers)
 
     # endregion
@@ -144,7 +146,7 @@ class SnapperConnection:
     def unmount_snapshot(self, config_name: str, number: int, user_request: bool) -> None:
         return self.__interface.UmountSnapshot(config_name, number, user_request)
 
-    def get_mount_point(self, config_name, number) -> PathStr:
+    def get_mount_point(self, config_name: str, number: int) -> PathStr:
         return self.__interface.GetMountPoint(config_name, number)
 
     # endregion
@@ -167,7 +169,7 @@ class SnapperConnection:
     # endregion
 
     # region Signals
-    def __register_handler(self, signal_mame, handler: BaseHandler[FunctionType]) -> BaseHandler[FunctionType]:
+    def __register_handler(self, signal_mame: str, handler: BaseHandler[FunctionType]) -> BaseHandler[FunctionType]:
         self.__interface.connect_to_signal(signal_mame, lambda *args, **kwargs: handler.emit(*args, **kwargs))
 
         return handler

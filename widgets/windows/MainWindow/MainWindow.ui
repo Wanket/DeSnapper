@@ -108,6 +108,10 @@
    </widget>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>configsListWidget</tabstop>
+  <tabstop>snapshotsTreeWidget</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

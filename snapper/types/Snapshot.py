@@ -24,7 +24,7 @@ class Snapshot:
         number = str(self.number)
         snapshot_type = self.type.name
         pre_number = str(self.pre_number) if self.pre_number != 0 else ""
-        date_time = str(datetime.utcfromtimestamp(self.date_time)) if self.date_time != -1 else ""
+        date_time = str(datetime.fromtimestamp(self.date_time)) if self.date_time != -1 else ""
 
         try:
             user_id = getpwuid(self.user_id).pw_name

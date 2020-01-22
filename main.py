@@ -6,7 +6,6 @@ from sys import argv
 
 from PyQt5.QtWidgets import QApplication
 
-from snapper.SnapperConnection import SnapperConnection
 from widgets.windows.MainWindow.MainWindow import MainWindow
 
 if __name__ == '__main__':
@@ -14,8 +13,6 @@ if __name__ == '__main__':
         argv[0] = abspath(argv[0])
         system(f"pkexec env $(env | tr '\\n' ' ') {' '.join(argv)}")
         exit(0)
-
-    conn = SnapperConnection()
 
     app = QApplication(argv)
 
