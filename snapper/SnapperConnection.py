@@ -1,4 +1,3 @@
-from enum import Enum
 from typing import List, Dict, NewType, Callable
 
 from _dbus_glib_bindings import DBusGMainLoop

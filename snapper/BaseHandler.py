@@ -1,4 +1,4 @@
-from typing import Callable, TypeVar, Generic, Set
+from typing import TypeVar, Generic, Set
 
 FunctionType = TypeVar("FunctionType")
 
