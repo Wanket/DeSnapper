@@ -3,7 +3,7 @@ from typing import Dict, List, Optional, TypeVar
 from PyQt5.QtCore import QPoint
 from PyQt5.QtGui import QCursor
 from PyQt5.QtWidgets import QMainWindow, QTreeWidgetItem, QListWidgetItem, QMessageBox, \
-    QTreeWidget, QListWidget
+    QTreeWidget, QListWidget, QTableWidgetItem
 
 from snapper.SnapperConnection import SnapperConnection
 from snapper.types import Snapshot
@@ -51,12 +51,14 @@ class MainWindow(QMainWindow):
         self.__ui.configsListWidget.customContextMenuRequested.connect(
             self.__on_configs_list_widget_context_menu_requested)
 
+        self.__ui.snapshotsTreeWidget.itemClicked.connect(self.__on_snapshot_tree_widget_item_clicked)
+
         self.__snapper_connection.snapshot_created += self.__on_snapshot_created
         self.__snapper_connection.snapshots_deleted += self.__on_snapshots_deleted
 
     # endregion
 
-    # region Snapshots view functions
+    # region Configs/Snapshots view functions
     def __on_configs_list_selected_item_changed(self) -> None:
         config_name = self.__ui.configsListWidget.currentItem().text()
 
@@ -83,6 +85,21 @@ class MainWindow(QMainWindow):
 
         top_level_item.setFirstColumnSpanned(True)
         top_level_item.setExpanded(True)
+
+    def __on_snapshot_tree_widget_item_clicked(self, item: QTreeWidgetItem, _: int):
+        snapshot = self.__current_config_snapshots[int(item.text(0))]
+
+        self.__ui.userDataTableWidget.setRowCount(0)
+
+        for key, value in snapshot.user_data.items():
+            index = self.__ui.userDataTableWidget.rowCount()
+
+            self.__ui.userDataTableWidget.insertRow(index)
+
+            self.__ui.userDataTableWidget.setItem(index, 0, QTableWidgetItem(key))
+            self.__ui.userDataTableWidget.setItem(index, 1, QTableWidgetItem(value))
+
+        self.__ui.userDataDockWidget.setWindowTitle(f"User data of snapshot number {snapshot.number}")
 
     # endregion
 
