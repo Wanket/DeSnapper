@@ -3,6 +3,10 @@ from enum import Enum
 from pwd import getpwuid
 from typing import Dict, Tuple
 
+from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
+
+from snapper.types.Cleanup import Cleanup
+
 
 class Snapshot:
     def __init__(self, raw_object):
@@ -12,7 +16,7 @@ class Snapshot:
         self.date_time: int = raw_object[3]
         self.user_id: int = raw_object[4]
         self.description: str = raw_object[5]
-        self.cleanup: str = raw_object[6]
+        self.cleanup: Cleanup = Cleanup.from_str(raw_object[6])
         self.user_data: Dict[str, str] = raw_object[7]
 
     class Types(Enum):
@@ -31,4 +35,29 @@ class Snapshot:
         except KeyError:
             user_id = "$Unknown"
 
-        return number, snapshot_type, pre_number, date_time, user_id, self.cleanup, self.description
+        cleanup = str(self.cleanup)
+
+        return number, snapshot_type, pre_number, date_time, user_id, cleanup, self.description
+
+    def fill_user_data_table(self, user_data_table_widget: QTableWidget) -> None:
+        user_data_table_widget.setRowCount(0)
+
+        for key, value in self.user_data.items():
+            index = user_data_table_widget.rowCount()
+
+            user_data_table_widget.insertRow(index)
+
+            user_data_table_widget.setItem(index, 0, QTableWidgetItem(key))
+            user_data_table_widget.setItem(index, 1, QTableWidgetItem(value))
+
+    @staticmethod
+    def user_data_from_table(user_data_table_widget: QTableWidget) -> Dict[str, str]:
+        user_data = dict()
+        for i in range(user_data_table_widget.rowCount()):
+            key_item = user_data_table_widget.item(i, 0)
+            value_item = user_data_table_widget.item(i, 1)
+
+            if key_item is not None:
+                user_data[key_item.text()] = value_item.text() if value_item is not None else str()
+
+        return user_data

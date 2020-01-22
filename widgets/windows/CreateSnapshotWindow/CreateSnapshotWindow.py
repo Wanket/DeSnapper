@@ -6,19 +6,13 @@ from PyQt5.QtWidgets import QDialog, QMessageBox
 from dbus import DBusException
 
 from snapper.SnapperConnection import SnapperConnection
+from snapper.types.Cleanup import Cleanup
 from snapper.types.Config import Config
 from snapper.types.Snapshot import Snapshot
 from widgets.windows.CreateSnapshotWindow.Ui_CreateSnapshotWindow import Ui_CreateSnapshotWindow
 
 
 class CreateSnapshotWindow(QDialog):
-    __cleanup = {
-        0: "",
-        1: "number",
-        2: "timeline",
-        3: "empty-pre-post"
-    }
-
     def __init__(self, connection: SnapperConnection, current_config: Config):
         super().__init__()
 
@@ -35,7 +29,7 @@ class CreateSnapshotWindow(QDialog):
 
         self.__setup_listeners()
 
-    def __setup_listeners(self):
+    def __setup_listeners(self) -> None:
         self.__ui.snapshotTypeComboBox.currentIndexChanged.connect(self.__on_snapshot_type_combo_box_value_changed)
 
         self.__ui.addPushButton.clicked.connect(self.__on_add_push_button_click)
@@ -43,24 +37,18 @@ class CreateSnapshotWindow(QDialog):
 
         self.__ui.createPushButton.clicked.connect(self.__on_create_push_button_click)
 
-    def __setup_based_on_combo_box(self):
+    def __setup_based_on_combo_box(self) -> None:
         self.__on_snapshot_type_combo_box_value_changed(0)
 
-    def __on_create_push_button_click(self):
+    def __on_create_push_button_click(self) -> None:
         try:
             snapshot_type = Snapshot.Types(self.__ui.snapshotTypeComboBox.currentIndex())
 
             config_name = self.__current_config.name
             description = self.__ui.descriptionLineEdit.text()
-            cleanup = CreateSnapshotWindow.__cleanup[self.__ui.cleanupTypeComboBox.currentIndex()]
+            cleanup = str(Cleanup(self.__ui.cleanupTypeComboBox.currentIndex()))
 
-            user_data = dict()
-            for i in range(self.__ui.userDataTableWidget.rowCount()):
-                key_item = self.__ui.userDataTableWidget.item(i, 0)
-                value_item = self.__ui.userDataTableWidget.item(i, 1)
-
-                if key_item is not None:
-                    user_data[key_item.text()] = value_item.text() if value_item is not None else str()
+            user_data = Snapshot.user_data_from_table(self.__ui.userDataTableWidget)
 
             if snapshot_type == Snapshot.Types.Pre:
                 self.__connection.create_pre_snapshot(config_name, description, cleanup, user_data)
@@ -84,16 +72,16 @@ class CreateSnapshotWindow(QDialog):
         except DBusException as e:
             QMessageBox(text=e.get_dbus_name()).exec()
 
-    def __on_add_push_button_click(self):
+    def __on_add_push_button_click(self) -> None:
         self.__ui.userDataTableWidget.insertRow(self.__ui.userDataTableWidget.rowCount())
 
-    def __on_remove_push_button_click(self):
+    def __on_remove_push_button_click(self) -> None:
         row_count = self.__ui.userDataTableWidget.rowCount()
 
         if row_count != 0:
             self.__ui.userDataTableWidget.removeRow(row_count - 1)
 
-    def __on_snapshot_type_combo_box_value_changed(self, index: int):
+    def __on_snapshot_type_combo_box_value_changed(self, index: int) -> None:
         self.__ui.basedOnComboBox.clear()
 
         index = Snapshot.Types(index)

@@ -13,6 +13,6 @@ class BaseHandler(Generic[FunctionType]):
     def __isub__(self, callback: FunctionType):
         self.__callbacks.remove(callback)
 
-    def emit(self, *args, **kwargs):
+    def emit(self, *args, **kwargs) -> None:
         for callback in self.__callbacks:
             callback(*args, **kwargs)

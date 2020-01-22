@@ -13,6 +13,7 @@ from widgets.ConfirmMessageBox import ConfirmMessageBox
 from widgets.menus.ConfigMenu import ConfigMenu
 from widgets.menus.SnapshotMenu import SnapshotMenu
 from widgets.windows.CreateSnapshotWindow.CreateSnapshotWindow import CreateSnapshotWindow
+from widgets.windows.EditSnapshotWindow.EditSnapshotWindow import EditSnapshotWindow
 from widgets.windows.MainWindow.Ui_MainWindow import Ui_MainWindow
 
 
@@ -37,6 +38,7 @@ class MainWindow(QMainWindow):
         self.__setup_listeners()
 
     # region Startup functions
+
     def __get_configs(self) -> Dict[str, Config]:
         return {config.name: config for config in self.__snapper_connection.list_configs()}
 
@@ -54,11 +56,13 @@ class MainWindow(QMainWindow):
         self.__ui.snapshotsTreeWidget.itemClicked.connect(self.__on_snapshot_tree_widget_item_clicked)
 
         self.__snapper_connection.snapshot_created += self.__on_snapshot_created
+        self.__snapper_connection.snapshot_modified += self.__on_snapshot_edited
         self.__snapper_connection.snapshots_deleted += self.__on_snapshots_deleted
 
     # endregion
 
     # region Configs/Snapshots view functions
+
     def __on_configs_list_selected_item_changed(self) -> None:
         config_name = self.__ui.configsListWidget.currentItem().text()
 
@@ -78,8 +82,8 @@ class MainWindow(QMainWindow):
 
         top_level_item = QTreeWidgetItem([config_name])
 
-        for snapshot in self.__current_config_snapshots.values():
-            top_level_item.addChild(QTreeWidgetItem(snapshot.to_tree_widget_item_array()))
+        top_level_item.addChildren(QTreeWidgetItem(snapshot.to_tree_widget_item_array()) for snapshot in
+                                   self.__current_config_snapshots.values())
 
         self.__ui.snapshotsTreeWidget.addTopLevelItem(top_level_item)
 
@@ -89,17 +93,14 @@ class MainWindow(QMainWindow):
     def __on_snapshot_tree_widget_item_clicked(self, item: QTreeWidgetItem, _: int):
         snapshot = self.__current_config_snapshots[int(item.text(0))]
 
-        self.__ui.userDataTableWidget.setRowCount(0)
-
-        for key, value in snapshot.user_data.items():
-            index = self.__ui.userDataTableWidget.rowCount()
-
-            self.__ui.userDataTableWidget.insertRow(index)
-
-            self.__ui.userDataTableWidget.setItem(index, 0, QTableWidgetItem(key))
-            self.__ui.userDataTableWidget.setItem(index, 1, QTableWidgetItem(value))
+        snapshot.fill_user_data_table(self.__ui.userDataTableWidget)
 
         self.__ui.userDataDockWidget.setWindowTitle(f"User data of snapshot number {snapshot.number}")
+
+    def __clean_user_data_table(self):
+        self.__ui.userDataTableWidget.setRowCount(0)
+
+        self.__ui.userDataDockWidget.setWindowTitle("User data")
 
     # endregion
 
@@ -115,7 +116,8 @@ class MainWindow(QMainWindow):
             items = list()
         return items
 
-    # region Snapshot context menu functions
+    # region Snapshot context menu functions and callbacks
+
     def __on_snapshots_tree_widget_context_menu_requested(self, pos: QPoint) -> None:
         if self.__current_config is None:
             return
@@ -129,29 +131,58 @@ class MainWindow(QMainWindow):
 
         menu = SnapshotMenu(self, snapshots)
 
-        menu.action_delete_snapshot.connect(lambda: self.__on_delete_snapshots(snapshots))
         menu.action_create_snapshot.connect(self.__on_create_snapshot)
+        menu.action_edit_snapshot.connect(lambda: self.__on_edit_snapshot(snapshots[0]))
+        menu.action_delete_snapshot.connect(lambda: self.__on_delete_snapshots(snapshots))
 
         menu.exec(QCursor.pos())
 
+    def __add_snapshot_to_current_snapshots(self, config_name, snapshot_number):
+        snapshot = self.__snapper_connection.get_snapshot(config_name, snapshot_number)
+        self.__current_config_snapshots[snapshot_number] = snapshot
+        return snapshot
+
     # region Create snapshot functions
+
     def __on_create_snapshot(self) -> None:
-        window = CreateSnapshotWindow(self.__snapper_connection, self.__current_config)
-        window.exec()
+        CreateSnapshotWindow(self.__snapper_connection, self.__current_config).exec()
 
     def __on_snapshot_created(self, config_name: str, snapshot_number: int) -> None:
         if self.__current_config is not None and self.__current_config.name == config_name:
             top_level_item = self.__ui.snapshotsTreeWidget.topLevelItem(0)
 
-            snapshot = self.__snapper_connection.get_snapshot(config_name, snapshot_number)
-
-            self.__current_config_snapshots[snapshot_number] = snapshot
+            snapshot = self.__add_snapshot_to_current_snapshots(config_name, snapshot_number)
 
             top_level_item.addChild(QTreeWidgetItem(snapshot.to_tree_widget_item_array()))
 
     # endregion
 
-    # region Delete functions
+    # region Edit snapshot functions
+
+    def __on_edit_snapshot(self, snapshot: Snapshot) -> None:
+        EditSnapshotWindow(self.__snapper_connection, self.__current_config, snapshot).exec()
+
+    def __on_snapshot_edited(self, config_name: str, snapshot_number: int):
+        if self.__current_config is not None and self.__current_config.name == config_name:
+            top_level_item = self.__ui.snapshotsTreeWidget.topLevelItem(0)
+
+            snapshot = self.__add_snapshot_to_current_snapshots(config_name, snapshot_number)
+
+            for i in range(top_level_item.childCount()):
+                item = top_level_item.child(i)
+
+                if int(item.text(0)) == snapshot.number:
+                    top_level_item.removeChild(item)
+                    top_level_item.insertChild(i, QTreeWidgetItem(snapshot.to_tree_widget_item_array()))
+
+                    self.__clean_user_data_table()
+
+                    break
+
+    # endregion
+
+    # region Delete snapshots functions
+
     def __on_delete_snapshots(self, snapshots: List[Snapshot]) -> None:
         message_box = ConfirmMessageBox(self,
                                         f"Are you sure you want to delete {len(snapshots)} "
@@ -177,13 +208,17 @@ class MainWindow(QMainWindow):
             for snapshot_number in snapshot_numbers:
                 self.__current_config_snapshots.pop(snapshot_number)
 
+            self.__clean_user_data_table()
+
     # endregion
     # endregion
 
-    # region Configs context menu functions
+    # region Configs context menu functions and callbacks
+
     def __on_configs_list_widget_context_menu_requested(self, pos: QPoint) -> None:
         items = self.__check_and_repair_items_focus(pos, self.__ui.configsListWidget)
 
         menu = ConfigMenu(self, [self.__configs[item.text()] for item in items])
         menu.exec(QCursor.pos())
+
     # endregion

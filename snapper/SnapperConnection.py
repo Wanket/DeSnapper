@@ -57,6 +57,7 @@ class SnapperConnection:
             Callable[[SnapperConnection.ConfigName, SnapperConnection.SnapshotNumber], None]]())
 
     # region ConfigData
+
     def list_configs(self) -> List[Config]:
         return [Config(x) for x in self.__interface.ListConfigs()]
 
@@ -69,6 +70,7 @@ class SnapperConnection:
     # endregion
 
     # region Create/Delete config
+
     def create_config(self, config_name: str, sub_volume: str, fs_type: str, template_name: str) -> None:
         return self.__interface.CreateConfig(config_name, sub_volume, fs_type, template_name)
 
@@ -78,6 +80,7 @@ class SnapperConnection:
     # endregion
 
     # region Lock config
+
     """
     Locking disallows other clients to delete the config and delete snapshots for the config but not to create new 
     snapshots for the config. Several clients can lock the same config."""
@@ -91,14 +94,16 @@ class SnapperConnection:
     # endregion
 
     # region SnapshotsData
+
     def list_snapshots(self, config_name: str) -> List[Snapshot]:
         return [Snapshot(x) for x in self.__interface.ListSnapshots(config_name)]
 
     def get_snapshot(self, config_name: str, number: int) -> Snapshot:
         return Snapshot(self.__interface.GetSnapshot(config_name, number))
 
-    def set_snapshot(self, snapshot: Snapshot) -> None:
-        return self.__interface.SetSnapshot(snapshot.number, snapshot.description, snapshot.cleanup, snapshot.user_data)
+    def set_snapshot(self, config_name: str, snapshot: Snapshot) -> None:
+        return self.__interface.SetSnapshot(config_name, snapshot.number, snapshot.description, str(snapshot.cleanup),
+                                            snapshot.user_data)
 
     # endregion
 
@@ -138,6 +143,7 @@ class SnapperConnection:
     # method GetUsedSpace config-name number -> number (experimental)
 
     # region (un)mount
+
     """Snapshots mounted with user-request set to false will be unmounted (delayed) after the client disconnects."""
 
     def mount_snapshot(self, config_name: str, number: int, user_request: bool) -> PathStr:
@@ -155,6 +161,7 @@ class SnapperConnection:
         return self.__interface.Sync(config_name)
 
     # region Comparison
+
     def create_comparison(self, config_name: str, number1: int, number2: int) -> NumFiles:
         return self.__interface.CreateComparison(config_name, number1, number2)
 
@@ -169,8 +176,10 @@ class SnapperConnection:
     # endregion
 
     # region Signals
+
     def __register_handler(self, signal_mame: str, handler: BaseHandler[FunctionType]) -> BaseHandler[FunctionType]:
         self.__interface.connect_to_signal(signal_mame, lambda *args, **kwargs: handler.emit(*args, **kwargs))
 
         return handler
+
     # endregion
