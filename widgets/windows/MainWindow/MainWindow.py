@@ -3,12 +3,12 @@ from typing import Dict, List, Optional, TypeVar
 from PyQt5.QtCore import QPoint
 from PyQt5.QtGui import QCursor
 from PyQt5.QtWidgets import QMainWindow, QTreeWidgetItem, QListWidgetItem, QMessageBox, \
-    QTreeWidget, QListWidget, QTableWidgetItem
+    QTreeWidget, QListWidget
+from dbus import DBusException
 
+from qt_snapper.types.Snapshot import Snapshot
 from snapper.SnapperConnection import SnapperConnection
-from snapper.types import Snapshot
 from snapper.types.Config import Config
-from snapper.types.Snapshot import Snapshot
 from widgets.ConfirmMessageBox import ConfirmMessageBox
 from widgets.menus.ConfigMenu import ConfigMenu
 from widgets.menus.SnapshotMenu import SnapshotMenu
@@ -24,7 +24,7 @@ class MainWindow(QMainWindow):
         self.__ui = Ui_MainWindow()
         self.__ui.setupUi(self)
 
-        self.__snapper_connection = SnapperConnection()
+        self.__snapper_connection = SnapperConnection(Snapshot)
 
         self.__configs: Dict[SnapperConnection.ConfigName, Config]
         self.__current_config_snapshots: Dict[SnapperConnection.SnapshotNumber, Snapshot]
@@ -58,6 +58,8 @@ class MainWindow(QMainWindow):
         self.__snapper_connection.snapshot_created += self.__on_snapshot_created
         self.__snapper_connection.snapshot_modified += self.__on_snapshot_edited
         self.__snapper_connection.snapshots_deleted += self.__on_snapshots_deleted
+
+        self.__snapper_connection.config_deleted += self.__on_configs_deleted
 
     # endregion
 
@@ -184,13 +186,14 @@ class MainWindow(QMainWindow):
     # region Delete snapshots functions
 
     def __on_delete_snapshots(self, snapshots: List[Snapshot]) -> None:
-        message_box = ConfirmMessageBox(self,
-                                        f"Are you sure you want to delete {len(snapshots)} "
-                                        f"{'snapshot' if len(snapshots) == 1 else 'snapshots'}", )
-
-        if message_box.exec() == QMessageBox.Ok:
-            self.__snapper_connection.delete_snapshots(self.__current_config.name,
-                                                       [snapshot.number for snapshot in snapshots])
+        if ConfirmMessageBox(self,
+                             f"Are you sure you want to delete {len(snapshots)} "
+                             f"{'snapshot' if len(snapshots) == 1 else 'snapshots'}", ).exec() == QMessageBox.Ok:
+            try:
+                self.__snapper_connection.delete_snapshots(self.__current_config.name,
+                                                           [snapshot.number for snapshot in snapshots])
+            except DBusException as e:
+                QMessageBox(text=e.get_dbus_name()).exec()
 
     def __on_snapshots_deleted(self, config_name: str, snapshot_numbers: List[int]) -> None:
         if self.__current_config is not None and self.__current_config.name == config_name:
@@ -216,9 +219,38 @@ class MainWindow(QMainWindow):
     # region Configs context menu functions and callbacks
 
     def __on_configs_list_widget_context_menu_requested(self, pos: QPoint) -> None:
-        items = self.__check_and_repair_items_focus(pos, self.__ui.configsListWidget)
+        item = self.__ui.configsListWidget.itemAt(pos)
 
-        menu = ConfigMenu(self, [self.__configs[item.text()] for item in items])
+        config = self.__configs[item.text()] if item is not None else None
+
+        menu = ConfigMenu(self, config)
+
+        menu.action_delete_config.connect(lambda: self.__on_delete_configs(config))
+
         menu.exec(QCursor.pos())
 
+    # region Delete configs functions
+
+    def __on_delete_configs(self, config: Config) -> None:
+        if ConfirmMessageBox(self, f"Are you sure you want yo delete {config.name} config").exec() == QMessageBox.Ok:
+            try:
+                self.__snapper_connection.delete_config(config.name)
+            except DBusException as e:
+                QMessageBox(text=e.get_dbus_name()).exec()
+
+    def __on_configs_deleted(self, config_name) -> None:
+        if self.__current_config is not None and self.__current_config == config_name:
+            self.__ui.snapshotsTreeWidget.clear()
+
+            self.__current_config = None
+
+        for i in range(self.__ui.configsListWidget.count()):
+            if self.__ui.configsListWidget.item(i).text() == config_name:
+                self.__ui.configsListWidget.takeItem(i)
+
+                break
+
+        self.__configs.pop(config_name)
+
+    # endregion
     # endregion

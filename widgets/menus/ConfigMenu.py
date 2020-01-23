@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import List, Optional
 
 from PyQt5.QtWidgets import QWidget
 
@@ -9,13 +9,11 @@ from widgets.ActionsMenu import ActionsMenuMeta
 class ConfigMenu(metaclass=ActionsMenuMeta):
     _actions = ["Create config", "Edit config", "Delete config"]
 
-    def __init__(self, parent: QWidget, configs: List[Config]):
+    def __init__(self, parent: QWidget, config: Optional[Config]):
         super().__init__(parent)
 
         self.addAction(self._actions[0])
 
-        if len(configs) != 0:
-            if len(configs) == 1:
-                self.addAction(self._actions[1])
-
+        if config is not None:
+            self.addAction(self._actions[1])
             self.addAction(self._actions[2])

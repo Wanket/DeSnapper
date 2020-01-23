@@ -1,8 +1,8 @@
-from typing import Optional, List
+from typing import List
 
 from PyQt5.QtWidgets import QWidget
 
-from snapper.types.Snapshot import Snapshot
+from qt_snapper.types.Snapshot import Snapshot
 from widgets.ActionsMenu import ActionsMenuMeta
 
 

@@ -43,7 +43,6 @@ class Ui_MainWindow(object):
         self.verticalLayout.setObjectName("verticalLayout")
         self.configsListWidget = QtWidgets.QListWidget(self.dockWidgetContents)
         self.configsListWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.configsListWidget.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         self.configsListWidget.setObjectName("configsListWidget")
         self.verticalLayout.addWidget(self.configsListWidget)
         self.dockWidget.setWidget(self.dockWidgetContents)

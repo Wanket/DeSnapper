@@ -1,14 +1,11 @@
-from enum import Enum
-
-from PyQt5.QtCore import Qt, QRegularExpression
-from PyQt5.QtGui import QRegularExpressionValidator
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QDialog, QMessageBox
 from dbus import DBusException
 
 from snapper.SnapperConnection import SnapperConnection
 from snapper.types.Cleanup import Cleanup
 from snapper.types.Config import Config
-from snapper.types.Snapshot import Snapshot
+from qt_snapper.types.Snapshot import Snapshot
 from widgets.windows.CreateSnapshotWindow.Ui_CreateSnapshotWindow import Ui_CreateSnapshotWindow
 
 
@@ -63,7 +60,6 @@ class CreateSnapshotWindow(QDialog):
                 else:
                     read_only = self.__ui.readOnlyRadioButton.isChecked()
 
-                    print(config_name, parent_number, read_only, description, cleanup, user_data)
                     self.__connection.create_single_snapshot_v2(config_name, parent_number, read_only, description,
                                                                 cleanup,
                                                                 user_data)

@@ -6,7 +6,7 @@ from dbus import DBusException
 from snapper.SnapperConnection import SnapperConnection
 from snapper.types.Cleanup import Cleanup
 from snapper.types.Config import Config
-from snapper.types.Snapshot import Snapshot
+from qt_snapper.types.Snapshot import Snapshot
 from widgets.windows.EditSnapshotWindow.Ui_EditSnapshotWindow import Ui_EditSnapshotWindow
 
 

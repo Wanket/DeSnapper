@@ -1,4 +1,4 @@
-from typing import List, Dict, NewType, Callable
+from typing import List, Dict, NewType, Callable, TypeVar, Generic
 
 from _dbus_glib_bindings import DBusGMainLoop
 from dbus import SystemBus, Interface
@@ -6,10 +6,11 @@ from dbus import SystemBus, Interface
 from snapper.BaseHandler import BaseHandler, FunctionType
 from snapper.types.Config import Config
 from snapper.types.File import File
-from snapper.types.Snapshot import Snapshot
+
+Snapshot = TypeVar("Snapshot")
 
 
-class SnapperConnection:
+class SnapperConnection(Generic[Snapshot]):
     r"""
     Documentation of this class is based on this documentation:
     https://github.com/openSUSE/snapper/blob/504886a124d6773abb8cc218d57f2753967a0522/doc/dbus-protocol.txt
@@ -33,7 +34,9 @@ class SnapperConnection:
 
     ConfigName = NewType("ConfigName", str)
 
-    def __init__(self):
+    def __init__(self, snapshot_class: type(Snapshot)):
+        self.__snapshot_class = snapshot_class
+
         DBusGMainLoop(set_as_default=True)
 
         bus = SystemBus()
@@ -95,10 +98,10 @@ class SnapperConnection:
     # region SnapshotsData
 
     def list_snapshots(self, config_name: str) -> List[Snapshot]:
-        return [Snapshot(x) for x in self.__interface.ListSnapshots(config_name)]
+        return [self.__snapshot_class(x) for x in self.__interface.ListSnapshots(config_name)]
 
     def get_snapshot(self, config_name: str, number: int) -> Snapshot:
-        return Snapshot(self.__interface.GetSnapshot(config_name, number))
+        return self.__snapshot_class(self.__interface.GetSnapshot(config_name, number))
 
     def set_snapshot(self, config_name: str, snapshot: Snapshot) -> None:
         return self.__interface.SetSnapshot(config_name, snapshot.number, snapshot.description, str(snapshot.cleanup),
