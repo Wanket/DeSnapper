@@ -42,9 +42,6 @@ class Ui_CreateSnapshotWindow(object):
         self.cleanupTypeComboBox.addItem("")
         self.cleanupTypeComboBox.addItem("")
         self.gridLayout.addWidget(self.cleanupTypeComboBox, 1, 2, 1, 1)
-        self.readOnlyRadioButton = QtWidgets.QRadioButton(CreateSnapshotWindow)
-        self.readOnlyRadioButton.setObjectName("readOnlyRadioButton")
-        self.gridLayout.addWidget(self.readOnlyRadioButton, 1, 3, 1, 1)
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.gridLayout.addItem(spacerItem, 1, 4, 1, 1)
         self.label_4 = QtWidgets.QLabel(CreateSnapshotWindow)
@@ -97,14 +94,17 @@ class Ui_CreateSnapshotWindow(object):
         self.pushButton_2.setObjectName("pushButton_2")
         self.horizontalLayout_2.addWidget(self.pushButton_2)
         self.gridLayout.addLayout(self.horizontalLayout_2, 5, 2, 1, 3)
+        self.readOnlyCheckBox = QtWidgets.QCheckBox(CreateSnapshotWindow)
+        self.readOnlyCheckBox.setObjectName("readOnlyCheckBox")
+        self.gridLayout.addWidget(self.readOnlyCheckBox, 1, 3, 1, 1)
 
         self.retranslateUi(CreateSnapshotWindow)
         self.pushButton_2.clicked.connect(CreateSnapshotWindow.close)
         QtCore.QMetaObject.connectSlotsByName(CreateSnapshotWindow)
         CreateSnapshotWindow.setTabOrder(self.snapshotTypeComboBox, self.basedOnComboBox)
         CreateSnapshotWindow.setTabOrder(self.basedOnComboBox, self.cleanupTypeComboBox)
-        CreateSnapshotWindow.setTabOrder(self.cleanupTypeComboBox, self.readOnlyRadioButton)
-        CreateSnapshotWindow.setTabOrder(self.readOnlyRadioButton, self.descriptionLineEdit)
+        CreateSnapshotWindow.setTabOrder(self.cleanupTypeComboBox, self.readOnlyCheckBox)
+        CreateSnapshotWindow.setTabOrder(self.readOnlyCheckBox, self.descriptionLineEdit)
 
     def retranslateUi(self, CreateSnapshotWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -119,7 +119,6 @@ class Ui_CreateSnapshotWindow(object):
         self.cleanupTypeComboBox.setItemText(1, _translate("CreateSnapshotWindow", "Number"))
         self.cleanupTypeComboBox.setItemText(2, _translate("CreateSnapshotWindow", "Timeline"))
         self.cleanupTypeComboBox.setItemText(3, _translate("CreateSnapshotWindow", "Empty pre post"))
-        self.readOnlyRadioButton.setText(_translate("CreateSnapshotWindow", "Read only"))
         self.label_4.setText(_translate("CreateSnapshotWindow", "User data"))
         self.descriptionLineEdit.setPlaceholderText(_translate("CreateSnapshotWindow", "Description"))
         item = self.userDataTableWidget.horizontalHeaderItem(0)
@@ -128,3 +127,4 @@ class Ui_CreateSnapshotWindow(object):
         item.setText(_translate("CreateSnapshotWindow", "Value"))
         self.createPushButton.setText(_translate("CreateSnapshotWindow", "Create"))
         self.pushButton_2.setText(_translate("CreateSnapshotWindow", "Cancel"))
+        self.readOnlyCheckBox.setText(_translate("CreateSnapshotWindow", "Read only"))

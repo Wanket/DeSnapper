@@ -58,7 +58,7 @@ class CreateSnapshotWindow(QDialog):
                 if snapshot_type == Snapshot.Types.Post:
                     self.__connection.create_post_snapshot(config_name, parent_number, description, cleanup, user_data)
                 else:
-                    read_only = self.__ui.readOnlyRadioButton.isChecked()
+                    read_only = self.__ui.readOnlyCheckBox.isChecked()
 
                     self.__connection.create_single_snapshot_v2(config_name, parent_number, read_only, description,
                                                                 cleanup,
@@ -85,9 +85,9 @@ class CreateSnapshotWindow(QDialog):
         is_single = index == Snapshot.Types.Single
 
         if not is_single:
-            self.__ui.readOnlyRadioButton.setChecked(False)
+            self.__ui.readOnlyCheckBox.setChecked(False)
 
-        self.__ui.readOnlyRadioButton.setEnabled(is_single)
+        self.__ui.readOnlyCheckBox.setEnabled(is_single)
 
         for snapshot in self.__list_snapshots:
             if index != Snapshot.Types.Post or snapshot.type == Snapshot.Types.Pre:

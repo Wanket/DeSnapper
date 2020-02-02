@@ -13,6 +13,7 @@ from widgets.ConfirmMessageBox import ConfirmMessageBox
 from widgets.menus.ConfigMenu import ConfigMenu
 from widgets.menus.SnapshotMenu import SnapshotMenu
 from widgets.windows.CreateSnapshotWindow.CreateSnapshotWindow import CreateSnapshotWindow
+from widgets.windows.EditConfigWindow.EditConfigWindow import EditConfigWindow
 from widgets.windows.EditSnapshotWindow.EditSnapshotWindow import EditSnapshotWindow
 from widgets.windows.MainWindow.Ui_MainWindow import Ui_MainWindow
 
@@ -59,6 +60,7 @@ class MainWindow(QMainWindow):
         self.__snapper_connection.snapshot_modified += self.__on_snapshot_edited
         self.__snapper_connection.snapshots_deleted += self.__on_snapshots_deleted
 
+        self.__snapper_connection.config_modified += self.__on_config_edited
         self.__snapper_connection.config_deleted += self.__on_configs_deleted
 
     # endregion
@@ -226,6 +228,7 @@ class MainWindow(QMainWindow):
         menu = ConfigMenu(self, config)
 
         menu.action_delete_config.connect(lambda: self.__on_delete_configs(config))
+        menu.action_edit_config.connect(lambda: self.__on_edit_config(config))
 
         menu.exec(QCursor.pos())
 
@@ -251,6 +254,12 @@ class MainWindow(QMainWindow):
                 break
 
         self.__configs.pop(config_name)
+
+    def __on_edit_config(self, config: Config) -> None:
+        EditConfigWindow(self.__snapper_connection, config).exec()
+
+    def __on_config_edited(self, config_name: str) -> None:
+        self.__configs[config_name] = self.__snapper_connection.get_config(config_name)
 
     # endregion
     # endregion

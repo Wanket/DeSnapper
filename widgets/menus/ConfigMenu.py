@@ -1,9 +1,9 @@
-from typing import List, Optional
+from typing import Optional
 
 from PyQt5.QtWidgets import QWidget
 
 from snapper.types.Config import Config
-from widgets.ActionsMenu import ActionsMenuMeta
+from widgets.menus.ActionsMenu import ActionsMenuMeta
 
 
 class ConfigMenu(metaclass=ActionsMenuMeta):

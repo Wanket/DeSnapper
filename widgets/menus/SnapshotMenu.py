@@ -3,7 +3,7 @@ from typing import List
 from PyQt5.QtWidgets import QWidget
 
 from qt_snapper.types.Snapshot import Snapshot
-from widgets.ActionsMenu import ActionsMenuMeta
+from widgets.menus.ActionsMenu import ActionsMenuMeta
 
 
 class SnapshotMenu(metaclass=ActionsMenuMeta):
