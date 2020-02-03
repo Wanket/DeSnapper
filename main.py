@@ -1,22 +1,25 @@
 #!/usr/bin/env python3
 
-from os import getuid, system
-from os.path import abspath
+from os import getuid
 from sys import argv
 
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QMessageBox
 
-from widgets.windows.MainWindow.MainWindow import MainWindow
+from widgets.message_boxes.windows.MainWindow.MainWindow import MainWindow
 
 if __name__ == "__main__":
-    if getuid() != 0:
-        argv[0] = abspath(argv[0])
-        system(f"pkexec env $(env | tr '\\n' ' ') {' '.join(argv)}")
-        exit(0)
-
     app = QApplication(argv)
 
     window = MainWindow()
+
+    if getuid() != 0:
+        message = QMessageBox(text="Program has been run without root access. Not all features may be available.")
+        message.setWindowTitle("DeSnapper")
+
+        window.setWindowTitle("DeSnapper (no root)")
+
+        message.exec()
+
     window.show()
 
     exit(QApplication.exec())

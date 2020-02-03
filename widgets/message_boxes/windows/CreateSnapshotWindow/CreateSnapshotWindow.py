@@ -1,12 +1,13 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QDialog, QMessageBox
+from PyQt5.QtWidgets import QDialog
 from dbus import DBusException
 
 from snapper.SnapperConnection import SnapperConnection
 from snapper.types.Cleanup import Cleanup
 from snapper.types.Config import Config
 from qt_snapper.types.Snapshot import Snapshot
-from widgets.windows.CreateSnapshotWindow.Ui_CreateSnapshotWindow import Ui_CreateSnapshotWindow
+from widgets.message_boxes.DBusErrorMessageBox import DBusErrorMessageBox
+from widgets.message_boxes.windows.CreateSnapshotWindow.Ui_CreateSnapshotWindow import Ui_CreateSnapshotWindow
 
 
 class CreateSnapshotWindow(QDialog):
@@ -61,12 +62,11 @@ class CreateSnapshotWindow(QDialog):
                     read_only = self.__ui.readOnlyCheckBox.isChecked()
 
                     self.__connection.create_single_snapshot_v2(config_name, parent_number, read_only, description,
-                                                                cleanup,
-                                                                user_data)
+                                                                cleanup, user_data)
 
             self.close()
         except DBusException as e:
-            QMessageBox(text=e.get_dbus_name()).exec()
+            DBusErrorMessageBox(e).exec()
 
     def __on_add_push_button_click(self) -> None:
         self.__ui.userDataTableWidget.insertRow(self.__ui.userDataTableWidget.rowCount())
@@ -89,9 +89,8 @@ class CreateSnapshotWindow(QDialog):
 
         self.__ui.readOnlyCheckBox.setEnabled(is_single)
 
-        for snapshot in self.__list_snapshots:
-            if index != Snapshot.Types.Post or snapshot.type == Snapshot.Types.Pre:
-                self.__ui.basedOnComboBox.addItem(str(snapshot.number))
+        self.__ui.basedOnComboBox.addItems([str(snapshot.number) for snapshot in self.__list_snapshots if
+                                            index != Snapshot.Types.Post or snapshot.type == Snapshot.Types.Pre])
 
         if index != Snapshot.Types.Post:
             self.__ui.basedOnComboBox.setItemText(0, "0 (Current state)")

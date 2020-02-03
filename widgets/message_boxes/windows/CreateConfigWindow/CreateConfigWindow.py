@@ -6,9 +6,12 @@ from typing import NewType, Dict
 from PyQt5.QtCore import QRegularExpression
 from PyQt5.QtGui import QRegularExpressionValidator
 from PyQt5.QtWidgets import QDialog, QMessageBox
+from dbus import DBusException
 
 from snapper.SnapperConnection import SnapperConnection
-from widgets.windows.CreateConfigWindow.Ui_CreateConfigWindow import Ui_CreateConfigWindow
+from widgets.message_boxes.DBusErrorMessageBox import DBusErrorMessageBox
+from widgets.message_boxes.BtrfsEnvironmentErrorMessageBox import BtrfsEnvironmentErrorMessageBox
+from widgets.message_boxes.windows.CreateConfigWindow.Ui_CreateConfigWindow import Ui_CreateConfigWindow
 
 FileSystemPath = NewType("FileSystemPath", str)
 FileSystemType = NewType("FileSystemType", str)
@@ -35,7 +38,7 @@ class CreateConfigWindow(QDialog):
 
     def exec(self) -> int:
         if len(self.__filesystems) == 0:
-            message_box = QMessageBox(text="No available volumes to create config")
+            message_box = QMessageBox(text="No available volumes to create config.")
             message_box.setWindowTitle("Create config")
 
             return message_box.exec()
@@ -63,39 +66,49 @@ class CreateConfigWindow(QDialog):
         self.__ui.configSettingsWidget.is_enable_btrfs = self.__filesystems[path] == "btrfs"
 
         if self.__ui.configSettingsWidget.is_enable_btrfs:
-            self.__ui.configSettingsWidget.setup_qgroups(path)
+            try:
+                self.__ui.configSettingsWidget.setup_qgroups(path)
+            except EnvironmentError as e:
+                BtrfsEnvironmentErrorMessageBox(e).exec()
 
     def __get_filesystems(self) -> Dict[FileSystemType, FileSystemPath]:
         result = dict()
 
-        with open("/etc/mtab", "r") as file:
-            for line in file.readlines():
-                mount_item = line.split()
+        try:
+            with open("/etc/mtab", "w") as file:
+                for line in file.readlines():
+                    mount_item = line.split()
 
-                fs_type = mount_item[2]
+                    fs_type = mount_item[2]
 
-                if fs_type == "ext4dev":
-                    fs_type = "ext4"
+                    if fs_type == "ext4dev":
+                        fs_type = "ext4"
 
-                if fs_type == "btrfs" or fs_type == "ext4" or CreateConfigWindow.__lvm_regexp.match(fs_type):
-                    result[mount_item[1]] = fs_type
+                    if fs_type == "btrfs" or fs_type == "ext4" or CreateConfigWindow.__lvm_regexp.match(fs_type):
+                        result[mount_item[1]] = fs_type
 
-        for config in self.__conn.list_configs():
-            if config.path in result:
-                result.pop(config.path)
+            for config in self.__conn.list_configs():
+                if config.path in result:
+                    result.pop(config.path)
+        except IOError as e:
+            message = QMessageBox(text="Error while getting mount point list")
+            message.setWindowTitle("Error")
+
+            message.exec()
 
         return result
 
     def __on_click_create_push_button(self):
-        sub_volume = self.__ui.volumeComboBox.currentText()
-        template_name = self.__ui.templateComboBox.currentText() if self.__ui.templateGroupBox.isChecked() else ""
-        config_name = self.__ui.configNameLineEdit.text()
+        try:
+            sub_volume = self.__ui.volumeComboBox.currentText()
+            template_name = self.__ui.templateComboBox.currentText() if self.__ui.templateGroupBox.isChecked() else ""
+            config_name = self.__ui.configNameLineEdit.text()
 
-        self.__conn.create_config(config_name, sub_volume, self.__filesystems[sub_volume], template_name)
+            self.__conn.create_config(config_name, sub_volume, self.__filesystems[sub_volume], template_name)
 
-        print(template_name)
+            if len(template_name) == 0:
+                self.__conn.set_config(config_name, self.__ui.configSettingsWidget.get_data())
 
-        if len(template_name) == 0:
-            self.__conn.set_config(config_name, self.__ui.configSettingsWidget.get_data())
-
-        self.close()
+            self.close()
+        except DBusException as e:
+            DBusErrorMessageBox(e).exec()

@@ -1,13 +1,14 @@
 from copy import deepcopy
 
-from PyQt5.QtWidgets import QDialog, QMessageBox
+from PyQt5.QtWidgets import QDialog
 from dbus import DBusException
 
 from snapper.SnapperConnection import SnapperConnection
 from snapper.types.Cleanup import Cleanup
 from snapper.types.Config import Config
 from qt_snapper.types.Snapshot import Snapshot
-from widgets.windows.EditSnapshotWindow.Ui_EditSnapshotWindow import Ui_EditSnapshotWindow
+from widgets.message_boxes.DBusErrorMessageBox import DBusErrorMessageBox
+from widgets.message_boxes.windows.EditSnapshotWindow.Ui_EditSnapshotWindow import Ui_EditSnapshotWindow
 
 
 class EditSnapshotWindow(QDialog):
@@ -40,4 +41,4 @@ class EditSnapshotWindow(QDialog):
 
             self.close()
         except DBusException as e:
-            QMessageBox(text=e.get_dbus_name()).exec()
+            DBusErrorMessageBox(e).exec()

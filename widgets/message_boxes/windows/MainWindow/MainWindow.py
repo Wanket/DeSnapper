@@ -2,21 +2,22 @@ from typing import Dict, List, Optional, TypeVar
 
 from PyQt5.QtCore import QPoint
 from PyQt5.QtGui import QCursor
-from PyQt5.QtWidgets import QMainWindow, QTreeWidgetItem, QListWidgetItem, QMessageBox, \
-    QTreeWidget, QListWidget
+from PyQt5.QtWidgets import QMainWindow, QTreeWidgetItem, QListWidgetItem, QMessageBox, QTreeWidget, QListWidget
 from dbus import DBusException
 
 from qt_snapper.types.Snapshot import Snapshot
 from snapper.SnapperConnection import SnapperConnection
 from snapper.types.Config import Config
+from utils.UserInfo import UserInfo
 from widgets.ConfirmMessageBox import ConfirmMessageBox
+from widgets.message_boxes.DBusErrorMessageBox import DBusErrorMessageBox
 from widgets.menus.ConfigMenu import ConfigMenu
 from widgets.menus.SnapshotMenu import SnapshotMenu
-from widgets.windows.CreateConfigWindow.CreateConfigWindow import CreateConfigWindow
-from widgets.windows.CreateSnapshotWindow.CreateSnapshotWindow import CreateSnapshotWindow
-from widgets.windows.EditConfigWindow.EditConfigWindow import EditConfigWindow
-from widgets.windows.EditSnapshotWindow.EditSnapshotWindow import EditSnapshotWindow
-from widgets.windows.MainWindow.Ui_MainWindow import Ui_MainWindow
+from widgets.message_boxes.windows.CreateConfigWindow.CreateConfigWindow import CreateConfigWindow
+from widgets.message_boxes.windows.CreateSnapshotWindow.CreateSnapshotWindow import CreateSnapshotWindow
+from widgets.message_boxes.windows.EditConfigWindow.EditConfigWindow import EditConfigWindow
+from widgets.message_boxes.windows.EditSnapshotWindow.EditSnapshotWindow import EditSnapshotWindow
+from widgets.message_boxes.windows.MainWindow.Ui_MainWindow import Ui_MainWindow
 
 
 class MainWindow(QMainWindow):
@@ -72,13 +73,17 @@ class MainWindow(QMainWindow):
     def __on_configs_list_selected_item_changed(self) -> None:
         config_name = self.__ui.configsListWidget.currentItem().text()
 
-        if self.__current_config is not None and config_name == self.__current_config.name:
+        config = self.__configs[config_name]
+
+        if self.__current_config is not None and config_name == self.__current_config.name or\
+                not UserInfo().check_permissions(config):
+
             return
 
         self.__current_config_snapshots = self.__get_snapshots(config_name)
         self.__setup_snapshots_view(config_name)
 
-        self.__current_config = self.__configs[config_name]
+        self.__current_config = config
 
     def __get_snapshots(self, config_name: str) -> Dict[int, Snapshot]:
         return {snapshot.number: snapshot for snapshot in self.__snapper_connection.list_snapshots(config_name)}
@@ -123,6 +128,7 @@ class MainWindow(QMainWindow):
             widget.clearSelection()
 
             items = list()
+
         return items
 
     # region Snapshot context menu functions and callbacks
@@ -133,10 +139,8 @@ class MainWindow(QMainWindow):
 
         items = self.__check_and_repair_items_focus(pos, self.__ui.snapshotsTreeWidget)
 
-        snapshots = list()
-        for item in items:
-            if item is not None and item != self.__ui.snapshotsTreeWidget.topLevelItem(0):
-                snapshots.append(self.__current_config_snapshots[int(item.text(0))])
+        snapshots = [self.__current_config_snapshots[int(item.text(0))] for item in items if
+                     item is not None and item != self.__ui.snapshotsTreeWidget.topLevelItem(0)]
 
         menu = SnapshotMenu(self, snapshots)
 
@@ -194,13 +198,13 @@ class MainWindow(QMainWindow):
 
     def __on_delete_snapshots(self, snapshots: List[Snapshot]) -> None:
         if ConfirmMessageBox(self, "Delete snapshots",
-                                   f"Are you sure you want to delete {len(snapshots)} "
-                                   f"{'snapshot' if len(snapshots) == 1 else 'snapshots'}?").exec() == QMessageBox.Ok:
+                             f"Are you sure you want to delete {len(snapshots)} "
+                             f"{'snapshot' if len(snapshots) == 1 else 'snapshots'}?").exec() == QMessageBox.Ok:
             try:
                 self.__snapper_connection.delete_snapshots(self.__current_config.name,
                                                            [snapshot.number for snapshot in snapshots])
             except DBusException as e:
-                QMessageBox(text=e.get_dbus_name()).exec()
+                DBusErrorMessageBox(e).exec()
 
     def __on_snapshots_deleted(self, config_name: str, snapshot_numbers: List[int]) -> None:
         if self.__current_config is not None and self.__current_config.name == config_name:
@@ -226,6 +230,9 @@ class MainWindow(QMainWindow):
     # region Configs context menu functions and callbacks
 
     def __on_configs_list_widget_context_menu_requested(self, pos: QPoint) -> None:
+        if not UserInfo().is_root():
+            return
+
         item = self.__ui.configsListWidget.itemAt(pos)
 
         config = self.__configs[item.text()] if item is not None else None
@@ -246,7 +253,7 @@ class MainWindow(QMainWindow):
             try:
                 self.__snapper_connection.delete_config(config.name)
             except DBusException as e:
-                QMessageBox(text=e.get_dbus_name()).exec()
+                DBusErrorMessageBox(e).exec()
 
     def __on_configs_deleted(self, config_name) -> None:
         if self.__current_config is not None and self.__current_config == config_name:

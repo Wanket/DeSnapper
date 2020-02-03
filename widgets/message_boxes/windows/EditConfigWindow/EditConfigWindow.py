@@ -1,8 +1,11 @@
 from PyQt5.QtWidgets import QDialog
+from dbus import DBusException
 
 from snapper.SnapperConnection import SnapperConnection
 from snapper.types.Config import Config
-from widgets.windows.EditConfigWindow.Ui_EditConfigWindow import Ui_EditConfigWindow
+from widgets.message_boxes.DBusErrorMessageBox import DBusErrorMessageBox
+from widgets.message_boxes.BtrfsEnvironmentErrorMessageBox import BtrfsEnvironmentErrorMessageBox
+from widgets.message_boxes.windows.EditConfigWindow.Ui_EditConfigWindow import Ui_EditConfigWindow
 
 
 class EditConfigWindow(QDialog):
@@ -26,7 +29,10 @@ class EditConfigWindow(QDialog):
             f"Editing config {self.__config.name} ({data.get('FSTYPE', '')} {data.get('SUBVOLUME', '')})")
 
         if data.get("FSTYPE", "") == "btrfs":
-            self.__ui.configSettingsWidget.setup_qgroups(data.get("SUBVOLUME", ""))
+            try:
+                self.__ui.configSettingsWidget.setup_qgroups(data.get("SUBVOLUME", ""))
+            except EnvironmentError as e:
+                BtrfsEnvironmentErrorMessageBox(e).exec()
 
         self.__ui.configSettingsWidget.fill_from_dict(data)
 
@@ -34,6 +40,9 @@ class EditConfigWindow(QDialog):
         self.__ui.editPushButton.pressed.connect(self.__on_click_edit_push_button)
 
     def __on_click_edit_push_button(self) -> None:
-        self.__conn.set_config(self.__config.name, self.__ui.configSettingsWidget.get_data())
+        try:
+            self.__conn.set_config(self.__config.name, self.__ui.configSettingsWidget.get_data())
 
-        self.close()
+            self.close()
+        except DBusException as e:
+            DBusErrorMessageBox(e).exec()

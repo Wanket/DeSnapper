@@ -15,7 +15,6 @@ class SnapshotMenu(metaclass=ActionsMenuMeta):
         self.addAction(self._actions[0])
 
         if len(snapshots) == 1:
-
             self.addAction(self._actions[1])
 
         if len(snapshots) != 0:
