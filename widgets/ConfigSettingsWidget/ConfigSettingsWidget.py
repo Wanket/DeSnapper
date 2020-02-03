@@ -16,6 +16,8 @@ from widgets.ConfigSettingsWidget.Ui_ConfigSettingsWidget import Ui_ConfigSettin
 
 
 class ConfigSettingsWidget(QWidget):
+    is_enable_btrfs = property()
+
     def __init__(self, parent: Optional[QWidget] = None):
         super().__init__(parent)
 
@@ -29,7 +31,15 @@ class ConfigSettingsWidget(QWidget):
 
         self.__setup_ui()
 
-    def setup_qgroups(self, path: Optional[str]):
+    @is_enable_btrfs.getter
+    def is_enable_btrfs(self):
+        return self.__ui.btrfsTab.isEnabled()
+
+    @is_enable_btrfs.setter
+    def is_enable_btrfs(self, value):
+        self.__ui.btrfsTab.setEnabled(value)
+
+    def setup_qgroups(self, path: Optional[str]) -> None:
         if get_qgroups is not None:
             result = get_qgroups(path)
 
@@ -41,7 +51,7 @@ class ConfigSettingsWidget(QWidget):
 
             self.__ui.qgroupComboBox.addItems([f"{level}/{subvolume_id}" for level, subvolume_id in result[1]])
 
-    def fill_from_dict(self, data: Dict[str, str]):
+    def fill_from_dict(self, data: Dict[str, str]) -> None:
         if data.get("FSTYPE", "") == "btrfs":
             self.__ui.spaceLimitSpinBox.setValue(int(float(data.get("SPACE_LIMIT", "0.5")) * 100))
 
@@ -98,10 +108,10 @@ class ConfigSettingsWidget(QWidget):
             "EMPTY_PRE_POST_MIN_AGE": str(self.__ui.emptyPrePostMinAgeSpinBox.value())
         }
 
-    def __setup_listeners(self):
+    def __setup_listeners(self) -> None:
         self.__ui.settingsTabWidget.currentChanged.connect(self.__update_sizes)
 
-    def __update_sizes(self, widget_index: int):
+    def __update_sizes(self, widget_index: int) -> None:
         for i in range(self.__ui.settingsTabWidget.count()):
             self.__ui.settingsTabWidget.widget(i).setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)
 
@@ -111,27 +121,30 @@ class ConfigSettingsWidget(QWidget):
 
         self.adjustSize()
 
-    def __setup_ui(self):
+        if self.parent() is not None:
+            self.parent().adjustSize()
+
+    def __setup_ui(self) -> None:
         self.__setup_users_ui()
         self.__setup_groups_ui()
         self.__setup_qgruops_ui()
 
-    def __setup_users_ui(self):
+    def __setup_users_ui(self) -> None:
         user: struct_passwd
         for user in getpwall():
             self.__ui.allowUsersListWidget.addItem(user.pw_name)
 
-    def __setup_groups_ui(self):
+    def __setup_groups_ui(self) -> None:
         group: struct_group
         for group in getgrall():
             self.__ui.allowGroupsListWidget.addItem(group.gr_name)
 
-    def __setup_qgruops_ui(self):
+    def __setup_qgruops_ui(self) -> None:
         if get_qgroups is None:
             self.__ui.qgroupComboBox.setEnabled(False)
 
     @staticmethod
-    def __enable_elements_in_list_widget(elements: List[str], list_widget: QListWidget):
+    def __enable_elements_in_list_widget(elements: List[str], list_widget: QListWidget) -> None:
         elements.sort()
         list_widget.sortItems()
 

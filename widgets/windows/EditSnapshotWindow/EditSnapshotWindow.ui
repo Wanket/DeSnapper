@@ -117,7 +117,8 @@
         <string>Edit</string>
        </property>
        <property name="icon">
-        <iconset theme="dialog-ok"/>
+        <iconset theme="dialog-ok">
+         <normaloff>.</normaloff>.</iconset>
        </property>
       </widget>
      </item>
@@ -127,7 +128,11 @@
         <string>Cancel</string>
        </property>
        <property name="icon">
-        <iconset theme="dialog-cancel"/>
+        <iconset theme="dialog-cancel">
+         <normaloff>.</normaloff>.</iconset>
+       </property>
+       <property name="default">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -135,6 +140,13 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>cleanupTypeComboBox</tabstop>
+  <tabstop>descriptionLineEdit</tabstop>
+  <tabstop>userDataTableWidget</tabstop>
+  <tabstop>editPushButton</tabstop>
+  <tabstop>pushButton_2</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

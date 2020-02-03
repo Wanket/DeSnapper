@@ -12,6 +12,7 @@ from snapper.types.Config import Config
 from widgets.ConfirmMessageBox import ConfirmMessageBox
 from widgets.menus.ConfigMenu import ConfigMenu
 from widgets.menus.SnapshotMenu import SnapshotMenu
+from widgets.windows.CreateConfigWindow.CreateConfigWindow import CreateConfigWindow
 from widgets.windows.CreateSnapshotWindow.CreateSnapshotWindow import CreateSnapshotWindow
 from widgets.windows.EditConfigWindow.EditConfigWindow import EditConfigWindow
 from widgets.windows.EditSnapshotWindow.EditSnapshotWindow import EditSnapshotWindow
@@ -60,6 +61,7 @@ class MainWindow(QMainWindow):
         self.__snapper_connection.snapshot_modified += self.__on_snapshot_edited
         self.__snapper_connection.snapshots_deleted += self.__on_snapshots_deleted
 
+        self.__snapper_connection.config_created += self.__on_config_created
         self.__snapper_connection.config_modified += self.__on_config_edited
         self.__snapper_connection.config_deleted += self.__on_configs_deleted
 
@@ -94,7 +96,10 @@ class MainWindow(QMainWindow):
         top_level_item.setFirstColumnSpanned(True)
         top_level_item.setExpanded(True)
 
-    def __on_snapshot_tree_widget_item_clicked(self, item: QTreeWidgetItem, _: int):
+    def __on_snapshot_tree_widget_item_clicked(self, item: QTreeWidgetItem, index: int):
+        if index == 0:
+            return
+
         snapshot = self.__current_config_snapshots[int(item.text(0))]
 
         snapshot.fill_user_data_table(self.__ui.userDataTableWidget)
@@ -188,9 +193,9 @@ class MainWindow(QMainWindow):
     # region Delete snapshots functions
 
     def __on_delete_snapshots(self, snapshots: List[Snapshot]) -> None:
-        if ConfirmMessageBox(self,
-                             f"Are you sure you want to delete {len(snapshots)} "
-                             f"{'snapshot' if len(snapshots) == 1 else 'snapshots'}", ).exec() == QMessageBox.Ok:
+        if ConfirmMessageBox(self, "Delete snapshots",
+                                   f"Are you sure you want to delete {len(snapshots)} "
+                                   f"{'snapshot' if len(snapshots) == 1 else 'snapshots'}?").exec() == QMessageBox.Ok:
             try:
                 self.__snapper_connection.delete_snapshots(self.__current_config.name,
                                                            [snapshot.number for snapshot in snapshots])
@@ -227,6 +232,7 @@ class MainWindow(QMainWindow):
 
         menu = ConfigMenu(self, config)
 
+        menu.action_create_config.connect(self.__on_create_config)
         menu.action_delete_config.connect(lambda: self.__on_delete_configs(config))
         menu.action_edit_config.connect(lambda: self.__on_edit_config(config))
 
@@ -235,7 +241,8 @@ class MainWindow(QMainWindow):
     # region Delete configs functions
 
     def __on_delete_configs(self, config: Config) -> None:
-        if ConfirmMessageBox(self, f"Are you sure you want yo delete {config.name} config").exec() == QMessageBox.Ok:
+        if ConfirmMessageBox(self, "Delete config",
+                             f"Are you sure you want to delete {config.name} config?").exec() == QMessageBox.Ok:
             try:
                 self.__snapper_connection.delete_config(config.name)
             except DBusException as e:
@@ -255,11 +262,27 @@ class MainWindow(QMainWindow):
 
         self.__configs.pop(config_name)
 
+    # endregion
+
+    # region Edit configs functions
+
     def __on_edit_config(self, config: Config) -> None:
         EditConfigWindow(self.__snapper_connection, config).exec()
 
     def __on_config_edited(self, config_name: str) -> None:
         self.__configs[config_name] = self.__snapper_connection.get_config(config_name)
+
+    # endregion
+
+    # region Create configs functions
+
+    def __on_create_config(self) -> None:
+        CreateConfigWindow(self.__snapper_connection).exec()
+
+    def __on_config_created(self, config_name: str) -> None:
+        self.__configs[config_name] = self.__snapper_connection.get_config(config_name)
+
+        self.__ui.configsListWidget.addItem(config_name)
 
     # endregion
     # endregion

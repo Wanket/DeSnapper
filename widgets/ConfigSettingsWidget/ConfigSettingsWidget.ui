@@ -41,7 +41,7 @@
        <item row="0" column="0">
         <widget class="QGroupBox" name="syncAclGroupBox">
          <property name="title">
-          <string>Enable list of users and groups allowed tp operate with the config</string>
+          <string>Enable list of users and groups allowed tp operate with config</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -256,7 +256,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_3">
+     <widget class="QWidget" name="btrfsTab">
       <attribute name="title">
        <string>btrfs</string>
       </attribute>
@@ -346,6 +346,22 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>settingsTabWidget</tabstop>
+  <tabstop>syncAclGroupBox</tabstop>
+  <tabstop>allowUsersListWidget</tabstop>
+  <tabstop>allowGroupsListWidget</tabstop>
+  <tabstop>timelineCreateCheckBox</tabstop>
+  <tabstop>backgruondComparisonCheckBox</tabstop>
+  <tabstop>numberCleanupGroupBox</tabstop>
+  <tabstop>numberMinAgeSpinBox</tabstop>
+  <tabstop>timelineCleanupGroupBox</tabstop>
+  <tabstop>timelineMinAgeSpinBox</tabstop>
+  <tabstop>emptyPrePostClenupGroupBox</tabstop>
+  <tabstop>emptyPrePostMinAgeSpinBox</tabstop>
+  <tabstop>qgroupComboBox</tabstop>
+  <tabstop>spaceLimitSpinBox</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

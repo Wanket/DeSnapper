@@ -37,12 +37,21 @@
        <property name="text">
         <string>Edit</string>
        </property>
+       <property name="icon">
+        <iconset theme="dialog-ok"/>
+       </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="cancelPushButton">
        <property name="text">
         <string>Cancel</string>
+       </property>
+       <property name="icon">
+        <iconset theme="dialog-cancel"/>
+       </property>
+       <property name="default">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
