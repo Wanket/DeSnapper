@@ -7,7 +7,7 @@ from snapper.types.Cleanup import Cleanup
 from snapper.types.Config import Config
 from qt_snapper.types.Snapshot import Snapshot
 from widgets.message_boxes.DBusErrorMessageBox import DBusErrorMessageBox
-from widgets.message_boxes.windows.CreateSnapshotWindow.Ui_CreateSnapshotWindow import Ui_CreateSnapshotWindow
+from widgets.windows.CreateSnapshotWindow.Ui_CreateSnapshotWindow import Ui_CreateSnapshotWindow
 
 
 class CreateSnapshotWindow(QDialog):

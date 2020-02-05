@@ -21,6 +21,13 @@
        <string>General</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_7" columnstretch="1,0">
+       <item row="2" column="0">
+        <widget class="QCheckBox" name="timelineCreateCheckBox">
+         <property name="text">
+          <string>Enable hourly snapshots</string>
+         </property>
+        </widget>
+       </item>
        <item row="3" column="0" colspan="2">
         <widget class="QCheckBox" name="backgruondComparisonCheckBox">
          <property name="text">
@@ -31,31 +38,18 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="0">
-        <widget class="QCheckBox" name="timelineCreateCheckBox">
-         <property name="text">
-          <string>Enable hourly snapshots</string>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="0">
-        <widget class="QGroupBox" name="syncAclGroupBox">
+        <widget class="QGroupBox" name="permGroupBox">
          <property name="title">
-          <string>Enable list of users and groups allowed tp operate with config</string>
+          <string>Users and groups allowed tp operate with config</string>
          </property>
          <property name="checkable">
-          <bool>true</bool>
+          <bool>false</bool>
          </property>
          <property name="checked">
           <bool>false</bool>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
-          <item row="1" column="0">
-           <widget class="CheckableListWidget" name="allowUsersListWidget"/>
-          </item>
-          <item row="1" column="1">
-           <widget class="CheckableListWidget" name="allowGroupsListWidget"/>
-          </item>
           <item row="0" column="0">
            <widget class="QLabel" name="label">
             <property name="text">
@@ -63,12 +57,43 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
+          <item row="0" column="2">
            <widget class="QLabel" name="label_2">
             <property name="text">
              <string>Groups</string>
             </property>
            </widget>
+          </item>
+          <item row="1" column="0" colspan="2">
+           <widget class="CheckableListWidget" name="allowUsersListWidget"/>
+          </item>
+          <item row="1" column="2">
+           <widget class="CheckableListWidget" name="allowGroupsListWidget"/>
+          </item>
+          <item row="2" column="0" colspan="3">
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <item>
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="syncAclCheckBox">
+              <property name="text">
+               <string>Sync users and groups to ACL for snapshot folder</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </spacer>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -348,7 +373,7 @@
  </customwidgets>
  <tabstops>
   <tabstop>settingsTabWidget</tabstop>
-  <tabstop>syncAclGroupBox</tabstop>
+  <tabstop>permGroupBox</tabstop>
   <tabstop>allowUsersListWidget</tabstop>
   <tabstop>allowGroupsListWidget</tabstop>
   <tabstop>timelineCreateCheckBox</tabstop>

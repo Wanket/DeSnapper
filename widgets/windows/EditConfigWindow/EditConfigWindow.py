@@ -5,7 +5,7 @@ from snapper.SnapperConnection import SnapperConnection
 from snapper.types.Config import Config
 from widgets.message_boxes.DBusErrorMessageBox import DBusErrorMessageBox
 from widgets.message_boxes.BtrfsEnvironmentErrorMessageBox import BtrfsEnvironmentErrorMessageBox
-from widgets.message_boxes.windows.EditConfigWindow.Ui_EditConfigWindow import Ui_EditConfigWindow
+from widgets.windows.EditConfigWindow.Ui_EditConfigWindow import Ui_EditConfigWindow
 
 
 class EditConfigWindow(QDialog):

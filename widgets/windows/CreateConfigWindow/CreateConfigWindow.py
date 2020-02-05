@@ -11,7 +11,7 @@ from dbus import DBusException
 from snapper.SnapperConnection import SnapperConnection
 from widgets.message_boxes.DBusErrorMessageBox import DBusErrorMessageBox
 from widgets.message_boxes.BtrfsEnvironmentErrorMessageBox import BtrfsEnvironmentErrorMessageBox
-from widgets.message_boxes.windows.CreateConfigWindow.Ui_CreateConfigWindow import Ui_CreateConfigWindow
+from widgets.windows.CreateConfigWindow.Ui_CreateConfigWindow import Ui_CreateConfigWindow
 
 FileSystemPath = NewType("FileSystemPath", str)
 FileSystemType = NewType("FileSystemType", str)
@@ -35,6 +35,8 @@ class CreateConfigWindow(QDialog):
         self.__setup_ui()
 
         self.__setup_listeners()
+
+        self.__ui.configSettingsWidget.update_sizes()
 
     def exec(self) -> int:
         if len(self.__filesystems) == 0:
@@ -75,7 +77,7 @@ class CreateConfigWindow(QDialog):
         result = dict()
 
         try:
-            with open("/etc/mtab", "w") as file:
+            with open("/etc/mtab", "r") as file:
                 for line in file.readlines():
                     mount_item = line.split()
 

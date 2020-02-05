@@ -9,15 +9,15 @@ from qt_snapper.types.Snapshot import Snapshot
 from snapper.SnapperConnection import SnapperConnection
 from snapper.types.Config import Config
 from utils.UserInfo import UserInfo
-from widgets.ConfirmMessageBox import ConfirmMessageBox
+from widgets.message_boxes.ConfirmMessageBox import ConfirmMessageBox
 from widgets.message_boxes.DBusErrorMessageBox import DBusErrorMessageBox
 from widgets.menus.ConfigMenu import ConfigMenu
 from widgets.menus.SnapshotMenu import SnapshotMenu
-from widgets.message_boxes.windows.CreateConfigWindow.CreateConfigWindow import CreateConfigWindow
-from widgets.message_boxes.windows.CreateSnapshotWindow.CreateSnapshotWindow import CreateSnapshotWindow
-from widgets.message_boxes.windows.EditConfigWindow.EditConfigWindow import EditConfigWindow
-from widgets.message_boxes.windows.EditSnapshotWindow.EditSnapshotWindow import EditSnapshotWindow
-from widgets.message_boxes.windows.MainWindow.Ui_MainWindow import Ui_MainWindow
+from widgets.windows.CreateConfigWindow.CreateConfigWindow import CreateConfigWindow
+from widgets.windows.CreateSnapshotWindow.CreateSnapshotWindow import CreateSnapshotWindow
+from widgets.windows.EditConfigWindow.EditConfigWindow import EditConfigWindow
+from widgets.windows.EditSnapshotWindow.EditSnapshotWindow import EditSnapshotWindow
+from widgets.windows.MainWindow.Ui_MainWindow import Ui_MainWindow
 
 
 class MainWindow(QMainWindow):

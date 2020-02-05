@@ -60,7 +60,7 @@ class ConfigSettingsWidget(QWidget):
 
         self.__enable_elements_in_list_widget(data.get("ALLOW_USERS", "").split(), self.__ui.allowUsersListWidget)
         self.__enable_elements_in_list_widget(data.get("ALLOW_GROUPS", "").split(), self.__ui.allowGroupsListWidget)
-        self.__ui.syncAclGroupBox.setChecked(data.get("SYNC_ACL", "no") == "yes")
+        self.__ui.syncAclCheckBox.setChecked(data.get("SYNC_ACL", "no") == "yes")
         self.__ui.backgruondComparisonCheckBox.setChecked(data.get("BACKGROUND_COMPARISON", "yes") == "yes")
         self.__ui.timelineCreateCheckBox.setChecked(data.get("TIMELINE_CREATE", "no") == "yes")
 
@@ -87,7 +87,7 @@ class ConfigSettingsWidget(QWidget):
 
             "ALLOW_USERS": " ".join(self.__get_enabled_elements_in_list_widget(self.__ui.allowUsersListWidget)),
             "ALLOW_GROUPS": " ".join(self.__get_enabled_elements_in_list_widget(self.__ui.allowGroupsListWidget)),
-            "SYNC_ACL": "yes" if self.__ui.syncAclGroupBox.isChecked() else "no",
+            "SYNC_ACL": "yes" if self.__ui.syncAclCheckBox.isChecked() else "no",
             "BACKGROUND_COMPARISON": "yes" if self.__ui.backgruondComparisonCheckBox.isChecked() else "no",
             "TIMELINE_CREATE": "yes" if self.__ui.timelineCreateCheckBox.isChecked() else "no",
 
@@ -110,6 +110,9 @@ class ConfigSettingsWidget(QWidget):
 
     def __setup_listeners(self) -> None:
         self.__ui.settingsTabWidget.currentChanged.connect(self.__update_sizes)
+
+    def update_sizes(self):
+        self.__update_sizes(self.__ui.settingsTabWidget.currentIndex())
 
     def __update_sizes(self, widget_index: int) -> None:
         for i in range(self.__ui.settingsTabWidget.count()):
