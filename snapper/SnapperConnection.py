@@ -6,11 +6,10 @@ from dbus import SystemBus, Interface
 from snapper.BaseHandler import BaseHandler, FunctionType
 from snapper.types.Config import Config
 from snapper.types.File import File
+from snapper.types.Snapshot import Snapshot
 
-Snapshot = TypeVar("Snapshot")
 
-
-class SnapperConnection(Generic[Snapshot]):
+class SnapperConnection:
     r"""
     Documentation of this class is based on this documentation:
     https://github.com/openSUSE/snapper/blob/504886a124d6773abb8cc218d57f2753967a0522/doc/dbus-protocol.txt
@@ -26,13 +25,13 @@ class SnapperConnection(Generic[Snapshot]):
     Some snapshots cannot be deleted (current, default and active). Delete
     requests for these are ignored."""
 
-    SnapshotNumber = NewType("SnapshotNumber", int)
+    SnapshotNumber = int
 
-    PathStr = NewType("PathStr", str)
+    PathStr = str
 
-    NumFiles = NewType("NumFiles", int)
+    NumFiles = int
 
-    ConfigName = NewType("ConfigName", str)
+    ConfigName = str
 
     def __init__(self, snapshot_class: type(Snapshot)):
         self.__snapshot_class = snapshot_class

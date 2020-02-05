@@ -13,8 +13,8 @@ from widgets.message_boxes.DBusErrorMessageBox import DBusErrorMessageBox
 from widgets.message_boxes.BtrfsEnvironmentErrorMessageBox import BtrfsEnvironmentErrorMessageBox
 from widgets.windows.CreateConfigWindow.Ui_CreateConfigWindow import Ui_CreateConfigWindow
 
-FileSystemPath = NewType("FileSystemPath", str)
-FileSystemType = NewType("FileSystemType", str)
+FileSystemPath = str
+FileSystemType = str
 
 
 class CreateConfigWindow(QDialog):

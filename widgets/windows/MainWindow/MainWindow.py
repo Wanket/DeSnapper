@@ -1,3 +1,5 @@
+from os import system, access, R_OK
+from subprocess import Popen
 from typing import Dict, List, Optional, TypeVar
 
 from PyQt5.QtCore import QPoint
@@ -9,10 +11,11 @@ from qt_snapper.types.Snapshot import Snapshot
 from snapper.SnapperConnection import SnapperConnection
 from snapper.types.Config import Config
 from utils.UserInfo import UserInfo
-from widgets.message_boxes.ConfirmMessageBox import ConfirmMessageBox
-from widgets.message_boxes.DBusErrorMessageBox import DBusErrorMessageBox
 from widgets.menus.ConfigMenu import ConfigMenu
 from widgets.menus.SnapshotMenu import SnapshotMenu
+from widgets.message_boxes.ConfirmMessageBox import ConfirmMessageBox
+from widgets.message_boxes.DBusErrorMessageBox import DBusErrorMessageBox
+from widgets.message_boxes.ErrorMessageBox import ErrorMessageBox
 from widgets.windows.CreateConfigWindow.CreateConfigWindow import CreateConfigWindow
 from widgets.windows.CreateSnapshotWindow.CreateSnapshotWindow import CreateSnapshotWindow
 from widgets.windows.EditConfigWindow.EditConfigWindow import EditConfigWindow
@@ -75,9 +78,8 @@ class MainWindow(QMainWindow):
 
         config = self.__configs[config_name]
 
-        if self.__current_config is not None and config_name == self.__current_config.name or\
+        if self.__current_config is not None and config_name == self.__current_config.name or \
                 not UserInfo().check_permissions(config):
-
             return
 
         self.__current_config_snapshots = self.__get_snapshots(config_name)
@@ -145,6 +147,7 @@ class MainWindow(QMainWindow):
         menu = SnapshotMenu(self, snapshots)
 
         menu.action_create_snapshot.connect(self.__on_create_snapshot)
+        menu.action_open_snapshot_folder.connect(lambda: self.__on_open_snapshot_folder(snapshots[0]))
         menu.action_edit_snapshot.connect(lambda: self.__on_edit_snapshot(snapshots[0]))
         menu.action_delete_snapshot.connect(lambda: self.__on_delete_snapshots(snapshots))
 
@@ -167,6 +170,26 @@ class MainWindow(QMainWindow):
             snapshot = self.__add_snapshot_to_current_snapshots(config_name, snapshot_number)
 
             top_level_item.addChild(QTreeWidgetItem(snapshot.to_tree_widget_item_array()))
+
+    # endregion
+
+    # region Open snapshot folder functions
+
+    def __on_open_snapshot_folder(self, snapshot: Snapshot) -> None:
+        try:
+            self.__snapper_connection.mount_snapshot(self.__current_config.name, snapshot.number, False)
+
+            mount_point = self.__snapper_connection.get_mount_point(self.__current_config.name, snapshot.number)
+
+            if not access(mount_point, R_OK):
+                ErrorMessageBox(f"You have no permissions to access snapshot folder number {snapshot.number}. "
+                                f"You can use ACL for get permissions").exec()
+
+                return
+
+            Popen(["xdg-open", mount_point])
+        except DBusException as e:
+            DBusErrorMessageBox(e).exec()
 
     # endregion
 
