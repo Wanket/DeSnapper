@@ -1,6 +1,6 @@
-from os import system, access, R_OK
+from os import access, R_OK
 from subprocess import Popen
-from typing import Dict, List, Optional, TypeVar
+from typing import Dict, List, Optional, TypeVar, Set
 
 from PyQt5.QtCore import QPoint
 from PyQt5.QtGui import QCursor
@@ -39,9 +39,19 @@ class MainWindow(QMainWindow):
 
         self.__configs = self.__get_configs()
 
+        self.__mounted_snapshots: Dict[SnapperConnection.ConfigName, Set[SnapperConnection.SnapshotNumber]] = dict()
+
         self.__setup_ui()
 
         self.__setup_listeners()
+
+    def __del__(self):
+        for config_name, snapshot_numbers in self.__mounted_snapshots.items():
+            for snapshot_number in snapshot_numbers:
+                try:
+                    self.__snapper_connection.unmount_snapshot(config_name, snapshot_number, True)
+                except DBusException:
+                    pass
 
     # region Startup functions
 
@@ -67,7 +77,7 @@ class MainWindow(QMainWindow):
 
         self.__snapper_connection.config_created += self.__on_config_created
         self.__snapper_connection.config_modified += self.__on_config_edited
-        self.__snapper_connection.config_deleted += self.__on_configs_deleted
+        self.__snapper_connection.config_deleted += self.__on_config_deleted
 
     # endregion
 
@@ -177,12 +187,23 @@ class MainWindow(QMainWindow):
 
     def __on_open_snapshot_folder(self, snapshot: Snapshot) -> None:
         try:
-            self.__snapper_connection.mount_snapshot(self.__current_config.name, snapshot.number, False)
+            config_name = self.__current_config.name
+            snapshot_number = snapshot.number
 
-            mount_point = self.__snapper_connection.get_mount_point(self.__current_config.name, snapshot.number)
+            if config_name not in self.__mounted_snapshots:
+                self.__mounted_snapshots[config_name] = set()
+
+            mounted_snapshots_set = self.__mounted_snapshots[config_name]
+
+            if snapshot not in mounted_snapshots_set:
+                self.__snapper_connection.mount_snapshot(config_name, snapshot_number, True)
+
+                mounted_snapshots_set.add(snapshot_number)
+
+            mount_point = self.__snapper_connection.get_mount_point(config_name, snapshot_number)
 
             if not access(mount_point, R_OK):
-                ErrorMessageBox(f"You have no permissions to access snapshot folder number {snapshot.number}. "
+                ErrorMessageBox(f"You have no permissions to access snapshot folder number {snapshot_number}. "
                                 f"You can use ACL for get permissions").exec()
 
                 return
@@ -230,6 +251,12 @@ class MainWindow(QMainWindow):
                 DBusErrorMessageBox(e).exec()
 
     def __on_snapshots_deleted(self, config_name: str, snapshot_numbers: List[int]) -> None:
+        if config_name in self.__mounted_snapshots:
+            snapshot_numbers_set = self.__mounted_snapshots[config_name]
+
+            for snapshot_number in snapshot_numbers:
+                snapshot_numbers_set.discard(snapshot_number)
+
         if self.__current_config is not None and self.__current_config.name == config_name:
             top_level_item = self.__ui.snapshotsTreeWidget.topLevelItem(0)
 
@@ -263,14 +290,14 @@ class MainWindow(QMainWindow):
         menu = ConfigMenu(self, config)
 
         menu.action_create_config.connect(self.__on_create_config)
-        menu.action_delete_config.connect(lambda: self.__on_delete_configs(config))
+        menu.action_delete_config.connect(lambda: self.__on_delete_config(config))
         menu.action_edit_config.connect(lambda: self.__on_edit_config(config))
 
         menu.exec(QCursor.pos())
 
     # region Delete configs functions
 
-    def __on_delete_configs(self, config: Config) -> None:
+    def __on_delete_config(self, config: Config) -> None:
         if ConfirmMessageBox(self, "Delete config",
                              f"Are you sure you want to delete {config.name} config?").exec() == QMessageBox.Ok:
             try:
@@ -278,7 +305,10 @@ class MainWindow(QMainWindow):
             except DBusException as e:
                 DBusErrorMessageBox(e).exec()
 
-    def __on_configs_deleted(self, config_name) -> None:
+    def __on_config_deleted(self, config_name) -> None:
+        if config_name in self.__mounted_snapshots:
+            self.__mounted_snapshots.pop(config_name)
+
         if self.__current_config is not None and self.__current_config == config_name:
             self.__ui.snapshotsTreeWidget.clear()
 
