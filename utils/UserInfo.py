@@ -17,7 +17,7 @@ class UserInfo:
         self.user = getuser()
         self.groups = set([group.gr_name for group in getgrall() if self.user in group.gr_mem])
 
-    def is_root(self):
+    def is_root(self) -> bool:
         return self.user == "root"
 
     def check_permissions(self, config: Config) -> bool:

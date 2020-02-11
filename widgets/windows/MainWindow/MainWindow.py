@@ -1,4 +1,6 @@
+from configparser import ConfigParser
 from os import access, R_OK
+from os.path import isfile
 from subprocess import Popen
 from typing import Dict, List, Optional, TypeVar, Set
 
@@ -10,6 +12,7 @@ from dbus import DBusException
 from qt_snapper.types.Snapshot import Snapshot
 from snapper.SnapperConnection import SnapperConnection
 from snapper.types.Config import Config
+from utils.ConfigFile import ConfigFile
 from utils.UserInfo import UserInfo
 from widgets.menus.ConfigMenu import ConfigMenu
 from widgets.menus.SnapshotMenu import SnapshotMenu
@@ -41,6 +44,9 @@ class MainWindow(QMainWindow):
 
         self.__mounted_snapshots: Dict[SnapperConnection.ConfigName, Set[SnapperConnection.SnapshotNumber]] = dict()
 
+        self.__apt_config: Optional[ConfigFile] = self.__get_config("/etc/default/snapper") \
+            if UserInfo().is_root() else None
+
         self.__setup_ui()
 
         self.__setup_listeners()
@@ -62,6 +68,13 @@ class MainWindow(QMainWindow):
         for config_name in self.__configs.keys():
             self.__ui.configsListWidget.addItem(QListWidgetItem(config_name))
 
+        if self.__apt_config is not None:
+            try:
+                self.__ui.actionEnable_auto_snapshots_on_apt_upgrade.setChecked(
+                    self.__apt_config["DISABLE_APT_SNAPSHOT"] == "\"no\"")
+            except KeyError:
+                pass
+
     def __setup_listeners(self) -> None:
         self.__ui.configsListWidget.itemSelectionChanged.connect(self.__on_configs_list_selected_item_changed)
         self.__ui.snapshotsTreeWidget.customContextMenuRequested.connect(
@@ -78,6 +91,27 @@ class MainWindow(QMainWindow):
         self.__snapper_connection.config_created += self.__on_config_created
         self.__snapper_connection.config_modified += self.__on_config_edited
         self.__snapper_connection.config_deleted += self.__on_config_deleted
+
+        self.__ui.actionEnable_auto_snapshots_on_apt_upgrade.changed.connect(
+            self.__on_enable_auto_snapshots_on_apt_upgrade_clicked)
+
+    @staticmethod
+    def __get_config(path: str) -> Optional[ConfigFile]:
+        return ConfigFile(path) if isfile(path) else None
+
+    # endregion
+
+    # region Menu bar functions
+
+    # region Apt auto snapshot functions
+
+    def __on_enable_auto_snapshots_on_apt_upgrade_clicked(self) -> None:
+        self.__apt_config["DISABLE_APT_SNAPSHOT"] = "\"yes\"" \
+            if not self.__ui.actionEnable_auto_snapshots_on_apt_upgrade.isChecked() else "\"no\""
+
+        self.__apt_config.sync_to_file()
+
+    # endregion
 
     # endregion
 
@@ -113,7 +147,7 @@ class MainWindow(QMainWindow):
         top_level_item.setFirstColumnSpanned(True)
         top_level_item.setExpanded(True)
 
-    def __on_snapshot_tree_widget_item_clicked(self, item: QTreeWidgetItem, index: int):
+    def __on_snapshot_tree_widget_item_clicked(self, item: QTreeWidgetItem, index: int) -> None:
         if index == 0:
             return
 
@@ -123,7 +157,7 @@ class MainWindow(QMainWindow):
 
         self.__ui.userDataDockWidget.setWindowTitle(f"User data of snapshot number {snapshot.number}")
 
-    def __clean_user_data_table(self):
+    def __clean_user_data_table(self) -> None:
         self.__ui.userDataTableWidget.setRowCount(0)
 
         self.__ui.userDataDockWidget.setWindowTitle("User data")
@@ -163,9 +197,11 @@ class MainWindow(QMainWindow):
 
         menu.exec(QCursor.pos())
 
-    def __add_snapshot_to_current_snapshots(self, config_name, snapshot_number):
+    def __add_snapshot_to_current_snapshots(self, config_name, snapshot_number) -> Snapshot:
         snapshot = self.__snapper_connection.get_snapshot(config_name, snapshot_number)
+
         self.__current_config_snapshots[snapshot_number] = snapshot
+
         return snapshot
 
     # region Create snapshot functions
@@ -219,7 +255,7 @@ class MainWindow(QMainWindow):
     def __on_edit_snapshot(self, snapshot: Snapshot) -> None:
         EditSnapshotWindow(self.__snapper_connection, self.__current_config, snapshot).exec()
 
-    def __on_snapshot_edited(self, config_name: str, snapshot_number: int):
+    def __on_snapshot_edited(self, config_name: str, snapshot_number: int) -> None:
         if self.__current_config is not None and self.__current_config.name == config_name:
             top_level_item = self.__ui.snapshotsTreeWidget.topLevelItem(0)
 

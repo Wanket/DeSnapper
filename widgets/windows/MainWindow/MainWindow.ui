@@ -77,6 +77,13 @@
      <height>30</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuOptions">
+    <property name="title">
+     <string>Options</string>
+    </property>
+    <addaction name="actionEnable_auto_snapshots_on_apt_upgrade"/>
+   </widget>
+   <addaction name="menuOptions"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QDockWidget" name="dockWidget">
@@ -145,11 +152,21 @@
     </layout>
    </widget>
   </widget>
+  <action name="actionEnable_auto_snapshots_on_apt_upgrade">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Enable auto snapshots on apt upgrade</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>configsListWidget</tabstop>
   <tabstop>snapshotsTreeWidget</tabstop>
  </tabstops>
  <resources/>
- <connections/>
 </ui>

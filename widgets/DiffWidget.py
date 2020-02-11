@@ -27,7 +27,7 @@ class DiffWidget(QWidget):
 
         self.__setup_listeners()
 
-    def __setup_ui(self):
+    def __setup_ui(self) -> None:
         layout = QHBoxLayout(self)
 
         layout.addWidget(self.__left_widget)
@@ -46,7 +46,7 @@ class DiffWidget(QWidget):
         self.__left_widget.setReadOnly(True)
         self.__right_widget.setReadOnly(True)
 
-    def __setup_listeners(self):
+    def __setup_listeners(self) -> None:
         self.__left_widget.verticalScrollBar().valueChanged.connect(self.__right_widget.verticalScrollBar().setValue)
         self.__right_widget.verticalScrollBar().valueChanged.connect(self.__left_widget.verticalScrollBar().setValue)
 
@@ -55,7 +55,7 @@ class DiffWidget(QWidget):
         self.__right_widget.horizontalScrollBar().valueChanged.connect(
             self.__left_widget.horizontalScrollBar().setValue)
 
-    def fill_diff(self, text1, text2):
+    def fill_diff(self, text1, text2) -> None:
         self.__left_widget.clear()
         self.__right_widget.clear()
 
@@ -83,25 +83,25 @@ class DiffWidget(QWidget):
         self.__left_widget.moveCursor(QTextCursor.Start)
         self.__right_widget.moveCursor(QTextCursor.Start)
 
-    def __append_void(self, text_edit: QPlainTextEdit):
+    def __append_void(self, text_edit: QPlainTextEdit) -> None:
         text_edit.appendPlainText("")
         text_edit.textCursor().setBlockFormat(self.__void_format)
 
     def __append_html(self, text_edit: QPlainTextEdit, line: str, text_block_format: QTextBlockFormat,
-                      diff_line: LineChange):
+                      diff_line: LineChange) -> None:
         text_edit.appendHtml(line)
         text_edit.textCursor().setBlockFormat(text_block_format if diff_line.changed else self.__default_format)
 
     @staticmethod
-    def __generate_element(diff_element: Element, color: str, flag: int):
+    def __generate_element(diff_element: Element, color: str, flag: int) -> None:
         return f'<span style="background-color: #39{color}">{diff_element.text}</span>' if diff_element.flag == flag \
             else diff_element.text
 
     @staticmethod
-    def __generate_line(diff_line: LineChange, color: str, prefix: str, number: Optional[int]):
+    def __generate_line(diff_line: LineChange, color: str, prefix: str, number: Optional[int]) -> str:
         return f'<span style="background-color: #{"14" if diff_line.changed else "00"}{color}">' \
                f'{DiffWidget.__generate_int_str(number)}</span>&nbsp;{prefix if diff_line.changed else "&nbsp;&nbsp;"}'
 
     @staticmethod
-    def __generate_int_str(integer: int):
+    def __generate_int_str(integer: int) -> str:
         return "&nbsp;" * (4 - len(str(integer))) + str(integer) + "&nbsp;"

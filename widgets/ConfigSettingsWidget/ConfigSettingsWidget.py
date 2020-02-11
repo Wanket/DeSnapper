@@ -111,7 +111,7 @@ class ConfigSettingsWidget(QWidget):
     def __setup_listeners(self) -> None:
         self.__ui.settingsTabWidget.currentChanged.connect(self.__update_sizes)
 
-    def update_sizes(self):
+    def update_sizes(self) -> None:
         self.__update_sizes(self.__ui.settingsTabWidget.currentIndex())
 
     def __update_sizes(self, widget_index: int) -> None:

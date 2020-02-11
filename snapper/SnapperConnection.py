@@ -1,4 +1,4 @@
-from typing import List, Dict, NewType, Callable, TypeVar, Generic
+from typing import List, Dict, Callable
 
 from _dbus_glib_bindings import DBusGMainLoop
 from dbus import SystemBus, Interface

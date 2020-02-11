@@ -1,7 +1,7 @@
 from os import listdir
 from os.path import isfile, join
 from re import compile
-from typing import NewType, Dict
+from typing import Dict
 
 from PyQt5.QtCore import QRegularExpression
 from PyQt5.QtGui import QRegularExpressionValidator
@@ -9,8 +9,8 @@ from PyQt5.QtWidgets import QDialog, QMessageBox
 from dbus import DBusException
 
 from snapper.SnapperConnection import SnapperConnection
-from widgets.message_boxes.DBusErrorMessageBox import DBusErrorMessageBox
 from widgets.message_boxes.BtrfsEnvironmentErrorMessageBox import BtrfsEnvironmentErrorMessageBox
+from widgets.message_boxes.DBusErrorMessageBox import DBusErrorMessageBox
 from widgets.windows.CreateConfigWindow.Ui_CreateConfigWindow import Ui_CreateConfigWindow
 
 FileSystemPath = str
@@ -92,7 +92,7 @@ class CreateConfigWindow(QDialog):
             for config in self.__conn.list_configs():
                 if config.path in result:
                     result.pop(config.path)
-        except IOError as e:
+        except IOError:
             message = QMessageBox(text="Error while getting mount point list")
             message.setWindowTitle("Error")
 
@@ -100,7 +100,7 @@ class CreateConfigWindow(QDialog):
 
         return result
 
-    def __on_click_create_push_button(self):
+    def __on_click_create_push_button(self) -> None:
         try:
             sub_volume = self.__ui.volumeComboBox.currentText()
             template_name = self.__ui.templateComboBox.currentText() if self.__ui.templateGroupBox.isChecked() else ""

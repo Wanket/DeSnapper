@@ -28,10 +28,10 @@ class EditSnapshotWindow(QDialog):
 
         self.__setup_listeners()
 
-    def __setup_listeners(self):
+    def __setup_listeners(self) -> None:
         self.__ui.editPushButton.clicked.connect(self.__on_edit_push_button_clicked)
 
-    def __on_edit_push_button_clicked(self):
+    def __on_edit_push_button_clicked(self) -> None:
         self.__snapshot.description = self.__ui.descriptionLineEdit.text()
         self.__snapshot.cleanup = Cleanup(self.__ui.cleanupTypeComboBox.currentIndex())
         self.__snapshot.user_data = Snapshot.user_data_from_table(self.__ui.userDataTableWidget)
