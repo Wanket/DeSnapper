@@ -81,7 +81,19 @@
     <property name="title">
      <string>Options</string>
     </property>
+    <widget class="QMenu" name="menuRun_cleanup_algorithm">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="title">
+      <string>Run cleanup algorithm</string>
+     </property>
+     <addaction name="actionNumberCleanup"/>
+     <addaction name="actionTimelineCleanup"/>
+     <addaction name="actionEmpty_pre_postCleanup"/>
+    </widget>
     <addaction name="actionEnable_auto_apt"/>
+    <addaction name="menuRun_cleanup_algorithm"/>
    </widget>
    <addaction name="menuOptions"/>
   </widget>
@@ -161,6 +173,21 @@
    </property>
    <property name="text">
     <string>Enable auto snapshots on apt upgrade</string>
+   </property>
+  </action>
+  <action name="actionNumberCleanup">
+   <property name="text">
+    <string>Number</string>
+   </property>
+  </action>
+  <action name="actionTimelineCleanup">
+   <property name="text">
+    <string>Timeline</string>
+   </property>
+  </action>
+  <action name="actionEmpty_pre_postCleanup">
+   <property name="text">
+    <string>Empty-pre-post</string>
    </property>
   </action>
  </widget>

@@ -1,7 +1,6 @@
-from configparser import ConfigParser
 from os import access, R_OK
 from os.path import isfile
-from subprocess import Popen
+from subprocess import Popen, PIPE
 from typing import Dict, List, Optional, TypeVar, Set
 
 from PyQt5.QtCore import QPoint
@@ -93,6 +92,9 @@ class MainWindow(QMainWindow):
         self.__snapper_connection.config_deleted += self.__on_config_deleted
 
         self.__ui.actionEnable_auto_apt.changed.connect(self.__on_enable_auto_apt_clicked)
+        self.__ui.actionNumberCleanup.triggered.connect(self.__on_number_cleanup_clicked)
+        self.__ui.actionTimelineCleanup.triggered.connect(self.__on_number_timeline_clicked)
+        self.__ui.actionEmpty_pre_postCleanup.triggered.connect(self.__on_number_empty_pre_post_clicked)
 
     @staticmethod
     def __get_config(path: str) -> Optional[ConfigFile]:
@@ -107,6 +109,30 @@ class MainWindow(QMainWindow):
             if not self.__ui.actionEnable_auto_apt.isChecked() else "\"no\""
 
         self.__apt_config.sync_to_file()
+
+    # region Cleanup functions
+
+    def __on_number_cleanup_clicked(self):
+        MainWindow.__cleanup(self.__current_config.name, "number")
+
+    def __on_number_timeline_clicked(self):
+        MainWindow.__cleanup(self.__current_config.name, "timeline")
+
+    def __on_number_empty_pre_post_clicked(self):
+        MainWindow.__cleanup(self.__current_config.name, "empty-pre-post")
+
+    @staticmethod
+    def __cleanup(config_name: str, cleanup_name: str):
+        snapper_proc = Popen(["snapper", "-c", config_name, "cleanup", cleanup_name], stderr=PIPE)
+        snapper_proc.wait()
+
+        message = QMessageBox(text=f"Cleanup algorithm {cleanup_name} has finished" if snapper_proc.returncode == 0
+                              else f"Error: {snapper_proc.stderr.read().decode('utf-8')}")
+        message.setWindowTitle("Cleanup")
+
+        message.exec()
+
+    # endregion
 
     # endregion
 
@@ -125,6 +151,8 @@ class MainWindow(QMainWindow):
         self.__setup_snapshots_view(config_name)
 
         self.__current_config = config
+
+        self.__ui.menuRun_cleanup_algorithm.setEnabled(True)
 
     def __get_snapshots(self, config_name: str) -> Dict[int, Snapshot]:
         return {snapshot.number: snapshot for snapshot in self.__snapper_connection.list_snapshots(config_name)}
@@ -362,6 +390,8 @@ class MainWindow(QMainWindow):
             self.__ui.snapshotsTreeWidget.clear()
 
             self.__current_config = None
+
+            self.__ui.menuRun_cleanup_algorithm.setDisabled(True)
 
         for i in range(self.__ui.configsListWidget.count()):
             if self.__ui.configsListWidget.item(i).text() == config_name:
