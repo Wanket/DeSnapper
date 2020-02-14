@@ -71,14 +71,15 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.addWidget(self.userDataTableWidget)
         self.userDataDockWidget.setWidget(self.dockWidgetContents_2)
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.userDataDockWidget)
-        self.actionEnable_auto_snapshots_on_apt_upgrade = QtWidgets.QAction(MainWindow)
-        self.actionEnable_auto_snapshots_on_apt_upgrade.setCheckable(True)
-        self.actionEnable_auto_snapshots_on_apt_upgrade.setChecked(True)
-        self.actionEnable_auto_snapshots_on_apt_upgrade.setObjectName("actionEnable_auto_snapshots_on_apt_upgrade")
-        self.menuOptions.addAction(self.actionEnable_auto_snapshots_on_apt_upgrade)
+        self.actionEnable_auto_apt = QtWidgets.QAction(MainWindow)
+        self.actionEnable_auto_apt.setCheckable(True)
+        self.actionEnable_auto_apt.setChecked(True)
+        self.actionEnable_auto_apt.setObjectName("actionEnable_auto_apt")
+        self.menuOptions.addAction(self.actionEnable_auto_apt)
         self.menubar.addAction(self.menuOptions.menuAction())
 
         self.retranslateUi(MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
         MainWindow.setTabOrder(self.configsListWidget, self.snapshotsTreeWidget)
 
     def retranslateUi(self, MainWindow):
@@ -98,4 +99,4 @@ class Ui_MainWindow(object):
         item.setText(_translate("MainWindow", "Key"))
         item = self.userDataTableWidget.horizontalHeaderItem(1)
         item.setText(_translate("MainWindow", "Value"))
-        self.actionEnable_auto_snapshots_on_apt_upgrade.setText(_translate("MainWindow", "Enable auto snapshots on apt upgrade"))
+        self.actionEnable_auto_apt.setText(_translate("MainWindow", "Enable auto snapshots on apt upgrade"))

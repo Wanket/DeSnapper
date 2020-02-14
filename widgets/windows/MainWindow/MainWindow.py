@@ -70,7 +70,7 @@ class MainWindow(QMainWindow):
 
         if self.__apt_config is not None:
             try:
-                self.__ui.actionEnable_auto_snapshots_on_apt_upgrade.setChecked(
+                self.__ui.actionEnable_auto_apt.setChecked(
                     self.__apt_config["DISABLE_APT_SNAPSHOT"] == "\"no\"")
             except KeyError:
                 pass
@@ -92,8 +92,7 @@ class MainWindow(QMainWindow):
         self.__snapper_connection.config_modified += self.__on_config_edited
         self.__snapper_connection.config_deleted += self.__on_config_deleted
 
-        self.__ui.actionEnable_auto_snapshots_on_apt_upgrade.changed.connect(
-            self.__on_enable_auto_snapshots_on_apt_upgrade_clicked)
+        self.__ui.actionEnable_auto_apt.changed.connect(self.__on_enable_auto_apt_clicked)
 
     @staticmethod
     def __get_config(path: str) -> Optional[ConfigFile]:
@@ -103,15 +102,11 @@ class MainWindow(QMainWindow):
 
     # region Menu bar functions
 
-    # region Apt auto snapshot functions
-
-    def __on_enable_auto_snapshots_on_apt_upgrade_clicked(self) -> None:
+    def __on_enable_auto_apt_clicked(self) -> None:
         self.__apt_config["DISABLE_APT_SNAPSHOT"] = "\"yes\"" \
-            if not self.__ui.actionEnable_auto_snapshots_on_apt_upgrade.isChecked() else "\"no\""
+            if not self.__ui.actionEnable_auto_apt.isChecked() else "\"no\""
 
         self.__apt_config.sync_to_file()
-
-    # endregion
 
     # endregion
 
@@ -191,6 +186,8 @@ class MainWindow(QMainWindow):
         menu = SnapshotMenu(self, snapshots)
 
         menu.action_create_snapshot.connect(self.__on_create_snapshot)
+        menu.action_create_pre_and_post_snapshots_running_terminal_in_between.connect(
+            self.__on_open_terminal_and_create_pre_post_clicked)
         menu.action_open_snapshot_folder.connect(lambda: self.__on_open_snapshot_folder(snapshots[0]))
         menu.action_edit_snapshot.connect(lambda: self.__on_edit_snapshot(snapshots[0]))
         menu.action_delete_snapshot.connect(lambda: self.__on_delete_snapshots(snapshots))
@@ -219,6 +216,22 @@ class MainWindow(QMainWindow):
 
     # endregion
 
+    # region Open terminal and create pre-post functions
+
+    def __on_open_terminal_and_create_pre_post_clicked(self):
+        try:
+            snapshot_number = self.__snapper_connection.create_pre_snapshot(self.__current_config.name,
+                                                                            "DeSnapper terminal pre", "", {})
+
+            Popen("x-terminal-emulator").wait()
+
+            self.__snapper_connection.create_post_snapshot(self.__current_config.name, snapshot_number,
+                                                           "DeSnapper terminal post", "", {})
+        except DBusException as e:
+            DBusErrorMessageBox(e).exec()
+
+    # endregion
+
     # region Open snapshot folder functions
 
     def __on_open_snapshot_folder(self, snapshot: Snapshot) -> None:
@@ -231,12 +244,12 @@ class MainWindow(QMainWindow):
 
             mounted_snapshots_set = self.__mounted_snapshots[config_name]
 
-            if snapshot not in mounted_snapshots_set:
-                self.__snapper_connection.mount_snapshot(config_name, snapshot_number, True)
+            if snapshot not in mounted_snapshots_set and snapshot.number != 0:
+                mount_point = self.__snapper_connection.mount_snapshot(config_name, snapshot_number, True)
 
                 mounted_snapshots_set.add(snapshot_number)
-
-            mount_point = self.__snapper_connection.get_mount_point(config_name, snapshot_number)
+            else:
+                mount_point = self.__snapper_connection.get_mount_point(config_name, snapshot_number)
 
             if not access(mount_point, R_OK):
                 ErrorMessageBox(f"You have no permissions to access snapshot folder number {snapshot_number}. "

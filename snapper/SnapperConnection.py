@@ -129,7 +129,7 @@ class SnapperConnection:
 
     def create_post_snapshot(self, config_name: str, pre_number: int, description: str, cleanup: str,
                              user_data: Dict[str, str]) -> SnapshotNumber:
-        return self.__interface.CreatePreSnapshot(config_name, pre_number, description, cleanup, user_data)
+        return self.__interface.CreatePostSnapshot(config_name, pre_number, description, cleanup, user_data)
 
     def delete_snapshots(self, config_name: str, numbers: List[int]) -> None:
         return self.__interface.DeleteSnapshots(config_name, numbers)

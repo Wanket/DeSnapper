@@ -81,7 +81,7 @@
     <property name="title">
      <string>Options</string>
     </property>
-    <addaction name="actionEnable_auto_snapshots_on_apt_upgrade"/>
+    <addaction name="actionEnable_auto_apt"/>
    </widget>
    <addaction name="menuOptions"/>
   </widget>
@@ -152,7 +152,7 @@
     </layout>
    </widget>
   </widget>
-  <action name="actionEnable_auto_snapshots_on_apt_upgrade">
+  <action name="actionEnable_auto_apt">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -169,4 +169,5 @@
   <tabstop>snapshotsTreeWidget</tabstop>
  </tabstops>
  <resources/>
+ <connections/>
 </ui>
