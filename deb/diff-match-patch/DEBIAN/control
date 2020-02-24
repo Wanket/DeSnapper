@@ -1,5 +1,5 @@
 Package: diff-match-patch
-Version: 20181111-0
+Version: 20181111-1
 Maintainer: Ivan Borisov ivan.alo@mail.ru
 Architecture: all
 Section: libs
