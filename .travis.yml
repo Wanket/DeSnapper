@@ -16,14 +16,14 @@ addons:
 script:
   - deb/make_debs.sh
 
-before_deploy:
-  - export RELEASE_PKG_FILE=$(ls deb/*.deb)
-
 deploy:
   provider: releases
   api_key: $GITHUB_TOKEN
   file_glob: true
-  file: "${RELEASE_PKG_FILE}"
+  file:
+    - "deb/desnapper.deb"
+    - "deb/diff-match-patch.deb"
+    - "deb/sxsdiff.deb"
   skip_cleanup: true
   on:
     tags: true

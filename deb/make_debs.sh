@@ -14,6 +14,8 @@ cd "${0%/*}"
 
 fakeroot dpkg-deb --build desnapper
 
+sed -i "s/size/$(du -s desnapper/usr | awk '{print $1}')/" desnapper/DEBIAN/control
+
 rm -rf desnapper/usr/lib
 
 git clone --branch v20181111 https://github.com/diff-match-patch-python/diff-match-patch.git diff-match-patch-20181111
@@ -25,6 +27,8 @@ git clone --branch v20181111 https://github.com/diff-match-patch-python/diff-mat
   mkdir -p ../diff-match-patch/usr/lib/python3/dist-packages/
   mv build/lib/diff_match_patch ../diff-match-patch/usr/lib/python3/dist-packages/
 )
+
+sed -i "s/size/$(du -s diff-match-patch/usr | awk '{print $1}')/" diff-match-patch/DEBIAN/control
 
 fakeroot dpkg-deb --build diff-match-patch
 
@@ -40,6 +44,8 @@ git clone --branch v0.3.0 https://github.com/timonwong/sxsdiff sxsdiff-0.3.0
   mkdir -p ../sxsdiff/usr/lib/python3/dist-packages/
   mv build/lib/sxsdiff ../sxsdiff/usr/lib/python3/dist-packages/
 )
+
+sed -i "s/size/$(du -s sxsdiff/usr | awk '{print $1}')/" sxsdiff/DEBIAN/control
 
 fakeroot dpkg-deb --build sxsdiff
 

@@ -5,6 +5,7 @@ Architecture: all
 Section: libs
 Description: Google's Diff Match and Patch library
 Depends: python3 (>= 3.6.7-1~18.04)
+Build-Depends: fakeroot (>=1.22-2ubuntu1)
 Installed-Size: size
 Priority: extra
 Origin: https://github.com/diff-match-patch-python/diff-match-patch
