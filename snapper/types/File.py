@@ -1,19 +1,22 @@
-from enum import Enum
+from enum import Flag
 
 
 class File:
-    class StatusFlags(Enum):
-        CREATED = 1
-        DELETED = 2
-        TYPE = 4
-        CONTENT = 8
-        PERMISSIONS = 16
-        OWNER = 32
-        USER = 32
-        GROUP = 64
-        XATTRS = 128
-        ACL = 256
+    class StatusFlags(Flag):
+        created = 1
+        deleted = 2
+        type = 4
+        content = 8
+        permissions = 16
+        owner = 32
+        # user = 32 deprecated
+        group = 64
+        xattrs = 128
+        acl = 256
+
+        def __str__(self):
+            return ", ".join([x for x in super().__str__().split(".")[1].split("|")])
 
     def __init__(self, raw_object):
         self.path: str = raw_object[0]
-        self.status: File.StatusFlags = raw_object[1]
+        self.status = File.StatusFlags(raw_object[1])

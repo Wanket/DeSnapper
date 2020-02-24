@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'widgets/windows/MainWindow/MainWindow.ui'
 #
-# Created by: PyQt5 UI code generator 5.12.3
+# Created by: PyQt5 UI code generator 5.14.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -27,7 +27,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_3.addWidget(self.snapshotsTreeWidget)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 30))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 27))
         self.menubar.setObjectName("menubar")
         self.menuOptions = QtWidgets.QMenu(self.menubar)
         self.menuOptions.setObjectName("menuOptions")
@@ -84,11 +84,15 @@ class Ui_MainWindow(object):
         self.actionTimelineCleanup.setObjectName("actionTimelineCleanup")
         self.actionEmpty_pre_postCleanup = QtWidgets.QAction(MainWindow)
         self.actionEmpty_pre_postCleanup.setObjectName("actionEmpty_pre_postCleanup")
+        self.actionCompare_snapshots = QtWidgets.QAction(MainWindow)
+        self.actionCompare_snapshots.setEnabled(False)
+        self.actionCompare_snapshots.setObjectName("actionCompare_snapshots")
         self.menuRun_cleanup_algorithm.addAction(self.actionNumberCleanup)
         self.menuRun_cleanup_algorithm.addAction(self.actionTimelineCleanup)
         self.menuRun_cleanup_algorithm.addAction(self.actionEmpty_pre_postCleanup)
         self.menuOptions.addAction(self.actionEnable_auto_apt)
         self.menuOptions.addAction(self.menuRun_cleanup_algorithm.menuAction())
+        self.menuOptions.addAction(self.actionCompare_snapshots)
         self.menubar.addAction(self.menuOptions.menuAction())
 
         self.retranslateUi(MainWindow)
@@ -117,3 +121,4 @@ class Ui_MainWindow(object):
         self.actionNumberCleanup.setText(_translate("MainWindow", "Number"))
         self.actionTimelineCleanup.setText(_translate("MainWindow", "Timeline"))
         self.actionEmpty_pre_postCleanup.setText(_translate("MainWindow", "Empty-pre-post"))
+        self.actionCompare_snapshots.setText(_translate("MainWindow", "Compare snapshots / undo files"))

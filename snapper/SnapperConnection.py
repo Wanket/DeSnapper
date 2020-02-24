@@ -172,7 +172,7 @@ class SnapperConnection:
     def get_files(self, config_name: str, number1: int, number2: int) -> List[File]:
         """The following command require a successful CreateComparison in advance."""
 
-        return self.__interface.GetFiles(config_name, number1, number2)
+        return [File(x) for x in self.__interface.GetFiles(config_name, number1, number2)]
 
     # endregion
 

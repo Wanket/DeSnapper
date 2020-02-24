@@ -74,7 +74,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>30</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOptions">
@@ -94,6 +94,7 @@
     </widget>
     <addaction name="actionEnable_auto_apt"/>
     <addaction name="menuRun_cleanup_algorithm"/>
+    <addaction name="actionCompare_snapshots"/>
    </widget>
    <addaction name="menuOptions"/>
   </widget>
@@ -188,6 +189,14 @@
   <action name="actionEmpty_pre_postCleanup">
    <property name="text">
     <string>Empty-pre-post</string>
+   </property>
+  </action>
+  <action name="actionCompare_snapshots">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Compare snapshots / undo files</string>
    </property>
   </action>
  </widget>

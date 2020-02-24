@@ -20,6 +20,7 @@ from widgets.message_boxes.DBusErrorMessageBox import DBusErrorMessageBox
 from widgets.message_boxes.ErrorMessageBox import ErrorMessageBox
 from widgets.windows.CreateConfigWindow.CreateConfigWindow import CreateConfigWindow
 from widgets.windows.CreateSnapshotWindow.CreateSnapshotWindow import CreateSnapshotWindow
+from widgets.windows.DiffWindow.DiffWindow import DiffWindow
 from widgets.windows.EditConfigWindow.EditConfigWindow import EditConfigWindow
 from widgets.windows.EditSnapshotWindow.EditSnapshotWindow import EditSnapshotWindow
 from widgets.windows.MainWindow.Ui_MainWindow import Ui_MainWindow
@@ -92,6 +93,8 @@ class MainWindow(QMainWindow):
         self.__snapper_connection.config_deleted += self.__on_config_deleted
 
         self.__ui.actionEnable_auto_apt.changed.connect(self.__on_enable_auto_apt_clicked)
+        self.__ui.actionCompare_snapshots.triggered.connect(self.__on_compare_snapshots_clicked)
+
         self.__ui.actionNumberCleanup.triggered.connect(self.__on_number_cleanup_clicked)
         self.__ui.actionTimelineCleanup.triggered.connect(self.__on_number_timeline_clicked)
         self.__ui.actionEmpty_pre_postCleanup.triggered.connect(self.__on_number_empty_pre_post_clicked)
@@ -134,6 +137,13 @@ class MainWindow(QMainWindow):
 
     # endregion
 
+    # region Compare functions
+
+    def __on_compare_snapshots_clicked(self):
+        DiffWindow(self.__current_config.name, self.__current_config_snapshots, self.__snapper_connection).exec()
+
+    # endregion
+
     # endregion
 
     # region Configs/Snapshots view functions
@@ -152,7 +162,10 @@ class MainWindow(QMainWindow):
 
         self.__current_config = config
 
+        self.__snapper_connection.lock_config(config.name)
+
         self.__ui.menuRun_cleanup_algorithm.setEnabled(True)
+        self.__ui.actionCompare_snapshots.setEnabled(True)
 
     def __get_snapshots(self, config_name: str) -> Dict[int, Snapshot]:
         return {snapshot.number: snapshot for snapshot in self.__snapper_connection.list_snapshots(config_name)}
@@ -389,9 +402,12 @@ class MainWindow(QMainWindow):
         if self.__current_config is not None and self.__current_config == config_name:
             self.__ui.snapshotsTreeWidget.clear()
 
+            self.__snapper_connection.unlock_config(self.__current_config.name)
+
             self.__current_config = None
 
             self.__ui.menuRun_cleanup_algorithm.setDisabled(True)
+            self.__ui.actionCompare_snapshots.setDisabled(True)
 
         for i in range(self.__ui.configsListWidget.count()):
             if self.__ui.configsListWidget.item(i).text() == config_name:

@@ -10,6 +10,8 @@ from widgets.windows.MainWindow.MainWindow import MainWindow
 if __name__ == "__main__":
     app = QApplication(argv)
 
+    QApplication.setApplicationName("DeSnapper")
+
     window = MainWindow()
 
     if getuid() != 0:

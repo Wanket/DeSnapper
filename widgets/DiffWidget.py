@@ -55,9 +55,12 @@ class DiffWidget(QWidget):
         self.__right_widget.horizontalScrollBar().valueChanged.connect(
             self.__left_widget.horizontalScrollBar().setValue)
 
-    def fill_diff(self, text1, text2) -> None:
+    def clear(self):
         self.__left_widget.clear()
         self.__right_widget.clear()
+
+    def fill_diff(self, text1, text2) -> None:
+        self.clear()
 
         for diff_line in DiffCalculator().run(text1, text2):
             if diff_line.left:
