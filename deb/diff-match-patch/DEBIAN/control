@@ -1,0 +1,10 @@
+Package: diff-match-patch
+Version: 20181111-0
+Maintainer: Ivan Borisov ivan.alo@mail.ru
+Architecture: all
+Section: libs
+Description: Google's Diff Match and Patch library
+Depends: python3 (>= 3.6.7-1~18.04)
+Installed-Size: size
+Priority: extra
+Origin: https://github.com/diff-match-patch-python/diff-match-patch

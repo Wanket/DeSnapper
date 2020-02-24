@@ -1,0 +1,10 @@
+Package: sxsdiff
+Version: 0.3.0-0
+Maintainer: Ivan Borisov ivan.alo@mail.ru
+Architecture: all
+Section: libs
+Description: Side by side diff generator for python
+Depends: python3 (>= 3.6.7-1~18.04), diff-match-patch (>= 20181111)
+Installed-Size: size
+Priority: extra
+Origin: https://github.com/timonwong/sxsdiff

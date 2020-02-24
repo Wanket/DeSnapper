@@ -7,6 +7,8 @@ from PyQt5.QtWidgets import QApplication, QMessageBox
 
 from widgets.windows.MainWindow.MainWindow import MainWindow
 
+# TODO: add ProgressBar in long operations
+
 if __name__ == "__main__":
     app = QApplication(argv)
 
