@@ -96,7 +96,39 @@
      </column>
     </widget>
    </item>
-   <item row="5" column="0" colspan="2">
+   <item row="5" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QPushButton" name="addPushButton">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset theme="list-add">
+         <normaloff>../../../../../.designer/backup</normaloff>../../../../../.designer/backup</iconset>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="removePushButton">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset theme="list-remove">
+         <normaloff>../../../../../.designer/backup</normaloff>../../../../../.designer/backup</iconset>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="5" column="1">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <spacer name="horizontalSpacer_2">
@@ -144,6 +176,8 @@
   <tabstop>cleanupTypeComboBox</tabstop>
   <tabstop>descriptionLineEdit</tabstop>
   <tabstop>userDataTableWidget</tabstop>
+  <tabstop>addPushButton</tabstop>
+  <tabstop>removePushButton</tabstop>
   <tabstop>editPushButton</tabstop>
   <tabstop>pushButton_2</tabstop>
  </tabstops>

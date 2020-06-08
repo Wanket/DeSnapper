@@ -29,6 +29,9 @@ class EditSnapshotWindow(QDialog):
         self.__setup_listeners()
 
     def __setup_listeners(self) -> None:
+        self.__ui.addPushButton.clicked.connect(self.__on_add_push_button_click)
+        self.__ui.removePushButton.clicked.connect(self.__on_remove_push_button_click)
+
         self.__ui.editPushButton.clicked.connect(self.__on_edit_push_button_clicked)
 
     def __on_edit_push_button_clicked(self) -> None:
@@ -42,3 +45,12 @@ class EditSnapshotWindow(QDialog):
             self.close()
         except DBusException as e:
             DBusErrorMessageBox(e).exec()
+
+    def __on_add_push_button_click(self) -> None:
+        self.__ui.userDataTableWidget.insertRow(self.__ui.userDataTableWidget.rowCount())
+
+    def __on_remove_push_button_click(self) -> None:
+        row_count = self.__ui.userDataTableWidget.rowCount()
+
+        if row_count != 0:
+            self.__ui.userDataTableWidget.removeRow(row_count - 1)

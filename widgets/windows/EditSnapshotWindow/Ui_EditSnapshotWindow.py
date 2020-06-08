@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'widgets/windows/EditSnapshotWindow/EditSnapshotWindow.ui'
 #
-# Created by: PyQt5 UI code generator 5.12.3
+# Created by: PyQt5 UI code generator 5.14.1
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -48,6 +48,23 @@ class Ui_EditSnapshotWindow(object):
         self.userDataTableWidget.horizontalHeader().setMinimumSectionSize(200)
         self.userDataTableWidget.verticalHeader().setVisible(False)
         self.gridLayout.addWidget(self.userDataTableWidget, 4, 0, 1, 2)
+        self.horizontalLayout_3 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
+        self.addPushButton = QtWidgets.QPushButton(EditSnapshotWindow)
+        self.addPushButton.setText("")
+        icon = QtGui.QIcon.fromTheme("list-add")
+        self.addPushButton.setIcon(icon)
+        self.addPushButton.setFlat(True)
+        self.addPushButton.setObjectName("addPushButton")
+        self.horizontalLayout_3.addWidget(self.addPushButton)
+        self.removePushButton = QtWidgets.QPushButton(EditSnapshotWindow)
+        self.removePushButton.setText("")
+        icon = QtGui.QIcon.fromTheme("list-remove")
+        self.removePushButton.setIcon(icon)
+        self.removePushButton.setFlat(True)
+        self.removePushButton.setObjectName("removePushButton")
+        self.horizontalLayout_3.addWidget(self.removePushButton)
+        self.gridLayout.addLayout(self.horizontalLayout_3, 5, 0, 1, 1)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         spacerItem1 = QtWidgets.QSpacerItem(248, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
@@ -60,13 +77,20 @@ class Ui_EditSnapshotWindow(object):
         self.pushButton_2 = QtWidgets.QPushButton(EditSnapshotWindow)
         icon = QtGui.QIcon.fromTheme("dialog-cancel")
         self.pushButton_2.setIcon(icon)
+        self.pushButton_2.setDefault(True)
         self.pushButton_2.setObjectName("pushButton_2")
         self.horizontalLayout.addWidget(self.pushButton_2)
-        self.gridLayout.addLayout(self.horizontalLayout, 5, 0, 1, 2)
+        self.gridLayout.addLayout(self.horizontalLayout, 5, 1, 1, 1)
 
         self.retranslateUi(EditSnapshotWindow)
         self.pushButton_2.clicked.connect(EditSnapshotWindow.close)
         QtCore.QMetaObject.connectSlotsByName(EditSnapshotWindow)
+        EditSnapshotWindow.setTabOrder(self.cleanupTypeComboBox, self.descriptionLineEdit)
+        EditSnapshotWindow.setTabOrder(self.descriptionLineEdit, self.userDataTableWidget)
+        EditSnapshotWindow.setTabOrder(self.userDataTableWidget, self.addPushButton)
+        EditSnapshotWindow.setTabOrder(self.addPushButton, self.removePushButton)
+        EditSnapshotWindow.setTabOrder(self.removePushButton, self.editPushButton)
+        EditSnapshotWindow.setTabOrder(self.editPushButton, self.pushButton_2)
 
     def retranslateUi(self, EditSnapshotWindow):
         _translate = QtCore.QCoreApplication.translate
