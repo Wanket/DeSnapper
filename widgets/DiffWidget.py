@@ -1,3 +1,4 @@
+from html import escape
 from typing import Optional
 
 from PyQt5.QtGui import QTextBlockFormat, QColor, QFont, QTextCursor
@@ -92,13 +93,15 @@ class DiffWidget(QWidget):
 
     def __append_html(self, text_edit: QPlainTextEdit, line: str, text_block_format: QTextBlockFormat,
                       diff_line: LineChange) -> None:
-        text_edit.appendHtml(line)
+        text_edit.appendHtml(f'<pre>{line}</pre>')
         text_edit.textCursor().setBlockFormat(text_block_format if diff_line.changed else self.__default_format)
 
     @staticmethod
-    def __generate_element(diff_element: Element, color: str, flag: int) -> None:
-        return f'<span style="background-color: #39{color}">{diff_element.text}</span>' if diff_element.flag == flag \
-            else diff_element.text
+    def __generate_element(diff_element: Element, color: str, flag: int) -> str:
+        text = f'<code class="language-html">{escape(diff_element.text)}</code>' \
+            if len(diff_element.text) != 0 else diff_element.text
+        return f'<span style="background-color: #39{color}">{text}</span>' if diff_element.flag == flag \
+            else text
 
     @staticmethod
     def __generate_line(diff_line: LineChange, color: str, prefix: str, number: Optional[int]) -> str:
