@@ -7,6 +7,7 @@ from typing import Dict, Optional, Tuple, Deque
 import sip
 from PyQt5.QtCore import Qt, QTemporaryFile
 from PyQt5.QtWidgets import QDialog, QTreeWidgetItem, QMessageBox
+from chardet import detect
 from dbus import DBusException
 
 from snapper.SnapperConnection import SnapperConnection
@@ -373,19 +374,10 @@ class DiffWindow(QDialog):
         is_file_second = isfile(real_second_path)
 
         try:
-            if is_file_first:
-                with open(real_first_path, "r") as first_file:
-                    first_text = first_file.read()
-            else:
-                first_text = ""
-
-            if is_file_second:
-                with open(real_second_path, "r") as second_file:
-                    second_text = second_file.read()
-            else:
-                second_text = ""
-        except UnicodeDecodeError:
-            first_text = f"File {self.__current_path} is a binary"
+            first_text = DiffWindow.__read_file(real_first_path) if is_file_first else ""
+            second_text = DiffWindow.__read_file(real_second_path) if is_file_second else ""
+        except (UnicodeDecodeError, TypeError):
+            first_text = f"{self.__current_path} is a binary file"
 
             second_text = first_text
 
@@ -397,3 +389,10 @@ class DiffWindow(QDialog):
         self.__ui.forceDiffWidget.hide()
 
     # endregion
+
+    @staticmethod
+    def __read_file(path: str) -> str:
+        with open(path, "rb") as file:
+            raw_data = file.read()
+
+            return raw_data.decode(detect(raw_data)["encoding"])

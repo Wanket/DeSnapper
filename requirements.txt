@@ -1,3 +1,4 @@
 sip
 PyQt5
 sxsdiff
+chardet
