@@ -7,6 +7,7 @@ cd "${0%/*}"
 
   cp -r ../qt_snapper desnapper/usr/lib/python3/dist-packages/DeSnapper
   cp -r ../snapper desnapper/usr/lib/python3/dist-packages/DeSnapper
+  cp -r ../systemd desnapper/usr/lib/python3/dist-packages/DeSnapper
   cp -r ../utils desnapper/usr/lib/python3/dist-packages/DeSnapper
   cp -r ../widgets desnapper/usr/lib/python3/dist-packages/DeSnapper
   cp -r ../main.py desnapper/usr/lib/python3/dist-packages/DeSnapper
