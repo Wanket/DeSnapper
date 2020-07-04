@@ -92,9 +92,18 @@
      <addaction name="actionTimelineCleanup"/>
      <addaction name="actionEmpty_pre_postCleanup"/>
     </widget>
+    <widget class="QMenu" name="menuSystemD">
+     <property name="title">
+      <string>SystemD</string>
+     </property>
+     <addaction name="actionEnable_create_snapshot_on_boot"/>
+     <addaction name="actionEnable_auto_Timeline_cleanup"/>
+     <addaction name="actionEnable_auto_daily_cleanup"/>
+    </widget>
     <addaction name="actionEnable_auto_apt"/>
     <addaction name="menuRun_cleanup_algorithm"/>
     <addaction name="actionCompare_snapshots"/>
+    <addaction name="menuSystemD"/>
    </widget>
    <addaction name="menuOptions"/>
   </widget>
@@ -197,6 +206,39 @@
    </property>
    <property name="text">
     <string>Compare snapshots / undo files</string>
+   </property>
+  </action>
+  <action name="actionEnable_create_snapshot_on_boot">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Enable create snapshot on boot</string>
+   </property>
+  </action>
+  <action name="actionEnable_auto_Timeline_cleanup">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Enable auto Timeline cleanup</string>
+   </property>
+  </action>
+  <action name="actionEnable_auto_daily_cleanup">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Enable auto daily cleanup</string>
    </property>
   </action>
  </widget>

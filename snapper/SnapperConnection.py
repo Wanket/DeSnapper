@@ -1,6 +1,5 @@
 from typing import List, Dict, Callable
 
-from _dbus_glib_bindings import DBusGMainLoop
 from dbus import SystemBus, Interface
 
 from snapper.BaseHandler import BaseHandler, FunctionType
@@ -35,8 +34,6 @@ class SnapperConnection:
 
     def __init__(self, snapshot_class: type(Snapshot)):
         self.__snapshot_class = snapshot_class
-
-        DBusGMainLoop(set_as_default=True)
 
         bus = SystemBus()
 

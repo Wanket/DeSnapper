@@ -205,7 +205,7 @@ class Ui_ConfigSettingsWidget(object):
         _translate = QtCore.QCoreApplication.translate
         self.timelineCreateCheckBox.setText(_translate("ConfigSettingsWidget", "Enable hourly snapshots"))
         self.backgruondComparisonCheckBox.setText(_translate("ConfigSettingsWidget", "Enable background compare pre and post snapshots after creation"))
-        self.permGroupBox.setTitle(_translate("ConfigSettingsWidget", "Users and groups allowed tp operate with config"))
+        self.permGroupBox.setTitle(_translate("ConfigSettingsWidget", "Users and groups allowed to operate with config"))
         self.label.setText(_translate("ConfigSettingsWidget", "Users"))
         self.label_2.setText(_translate("ConfigSettingsWidget", "Groups"))
         self.syncAclCheckBox.setText(_translate("ConfigSettingsWidget", "Sync users and groups to ACL for snapshot folder"))

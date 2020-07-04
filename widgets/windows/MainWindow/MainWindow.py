@@ -6,11 +6,13 @@ from typing import Dict, List, Optional, TypeVar, Set
 from PyQt5.QtCore import QPoint
 from PyQt5.QtGui import QCursor
 from PyQt5.QtWidgets import QMainWindow, QTreeWidgetItem, QListWidgetItem, QMessageBox, QTreeWidget, QListWidget
+from _dbus_glib_bindings import DBusGMainLoop
 from dbus import DBusException
 
 from qt_snapper.types.Snapshot import Snapshot
 from snapper.SnapperConnection import SnapperConnection
 from snapper.types.Config import Config
+from systemd.SystemdConnection import SystemdConnection
 from utils.ConfigFile import ConfigFile
 from utils.UserInfo import UserInfo
 from widgets.menus.ConfigMenu import ConfigMenu
@@ -33,7 +35,11 @@ class MainWindow(QMainWindow):
         self.__ui = Ui_MainWindow()
         self.__ui.setupUi(self)
 
+        DBusGMainLoop(set_as_default=True)
+
         self.__snapper_connection = SnapperConnection(Snapshot)
+
+        self.__systemd_connection = SystemdConnection()
 
         self.__configs: Dict[SnapperConnection.ConfigName, Config]
         self.__current_config_snapshots: Dict[SnapperConnection.SnapshotNumber, Snapshot]
@@ -74,6 +80,21 @@ class MainWindow(QMainWindow):
                     self.__apt_config["DISABLE_APT_SNAPSHOT"] == "\"no\"")
             except KeyError:
                 pass
+        else:
+            self.__ui.actionEnable_auto_apt.setEnabled(False)
+
+        is_root = UserInfo().is_root()
+
+        self.__ui.actionEnable_create_snapshot_on_boot.setEnabled(is_root)
+        self.__ui.actionEnable_auto_Timeline_cleanup.setEnabled(is_root)
+        self.__ui.actionEnable_auto_daily_cleanup.setEnabled(is_root)
+
+        self.__ui.actionEnable_create_snapshot_on_boot.setChecked(
+            self.__systemd_connection.get_unit_file_state(MainWindow.snapper_boot_unit[0]))
+        self.__ui.actionEnable_auto_Timeline_cleanup.setChecked(
+            self.__systemd_connection.get_unit_file_state(MainWindow.snapper_timeline_unit[0]))
+        self.__ui.actionEnable_auto_daily_cleanup.setChecked(
+            self.__systemd_connection.get_unit_file_state(MainWindow.snapper_cleanup_unit[0]))
 
     def __setup_listeners(self) -> None:
         self.__ui.configsListWidget.itemSelectionChanged.connect(self.__on_configs_list_selected_item_changed)
@@ -98,6 +119,10 @@ class MainWindow(QMainWindow):
         self.__ui.actionNumberCleanup.triggered.connect(self.__on_number_cleanup_clicked)
         self.__ui.actionTimelineCleanup.triggered.connect(self.__on_number_timeline_clicked)
         self.__ui.actionEmpty_pre_postCleanup.triggered.connect(self.__on_number_empty_pre_post_clicked)
+
+        self.__ui.actionEnable_create_snapshot_on_boot.changed.connect(self.__on_enable_create_snapshot_on_boot)
+        self.__ui.actionEnable_auto_Timeline_cleanup.changed.connect(self.__on_enable_auto_timeline_cleanup)
+        self.__ui.actionEnable_auto_daily_cleanup.changed.connect(self.__on_enable_auto_daily_cleanup)
 
     @staticmethod
     def __get_config(path: str) -> Optional[ConfigFile]:
@@ -141,6 +166,34 @@ class MainWindow(QMainWindow):
 
     def __on_compare_snapshots_clicked(self):
         DiffWindow(self.__current_config.name, self.__current_config_snapshots, self.__snapper_connection).exec()
+
+    # endregion
+
+    # region SystemD functions
+
+    snapper_boot_unit = ["snapper-boot.timer"]
+
+    snapper_timeline_unit = ["snapper-timeline.timer"]
+
+    snapper_cleanup_unit = ["snapper-cleanup.timer"]
+
+    def __on_enable_create_snapshot_on_boot(self) -> None:
+        self.__change_unit_state(self.__ui.actionEnable_create_snapshot_on_boot.isChecked(),
+                                 MainWindow.snapper_boot_unit)
+
+    def __on_enable_auto_timeline_cleanup(self) -> None:
+        self.__change_unit_state(self.__ui.actionEnable_auto_Timeline_cleanup.isChecked(),
+                                 MainWindow.snapper_timeline_unit)
+
+    def __on_enable_auto_daily_cleanup(self) -> None:
+        self.__change_unit_state(self.__ui.actionEnable_auto_daily_cleanup.isChecked(),
+                                 MainWindow.snapper_cleanup_unit)
+
+    def __change_unit_state(self, is_enable: bool, unit: List[str]) -> None:
+        if is_enable:
+            self.__systemd_connection.enable_unit_files(unit)
+        else:
+            self.__systemd_connection.disable_unit_files(unit)
 
     # endregion
 
